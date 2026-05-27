@@ -654,7 +654,7 @@ def identify_traps(
                 "The wedge leans on deeper platform APIs or third-party rails that may slow a first release.",
             )
         )
-    if count_channel_mentions(text) >= 2:
+    if count_channel_mentions(text) >= 2 or count_platform_name_mentions(text) >= 2:
         traps.append(
             Trap(
                 "platform breadth",
@@ -881,6 +881,7 @@ def parse_revenue_range(text: str) -> RevenueRange | None:
 PLATFORM_NAME_KEYWORDS = (
     "amazon",
     "walmart",
+    "ebay",
     "etsy",
     "stripe",
     "tiktok shop",
@@ -889,18 +890,11 @@ PLATFORM_NAME_KEYWORDS = (
 )
 
 
-CHANNEL_BREADTH_KEYWORDS = (
-    "shopify",
-    "dtc",
-    "retail",
-    "wholesale",
-    "wholesale portal",
-    "multi-channel",
-    "multichannel",
-    "pop-up",
-    "pop up",
-    "marketplace",
-    *PLATFORM_NAME_KEYWORDS,
+CHANNEL_BREADTH_GROUPS = (
+    ("shopify", "dtc", "storefront"),
+    ("marketplace", *PLATFORM_NAME_KEYWORDS),
+    ("wholesale", "wholesale portal", "b2b", "stockist"),
+    ("retail", "retailer", "pop-up", "pop up"),
 )
 
 
@@ -946,7 +940,17 @@ COMPLIANCE_KEYWORDS = (
 
 
 def count_channel_mentions(text: str) -> int:
-    return count_any(text, CHANNEL_BREADTH_KEYWORDS, cap=len(CHANNEL_BREADTH_KEYWORDS))
+    if contains_any(text, ("multi-channel", "multichannel", "split across")):
+        return 2
+    groups = 0
+    for group in CHANNEL_BREADTH_GROUPS:
+        if contains_any(text, group):
+            groups += 1
+    return groups
+
+
+def count_platform_name_mentions(text: str) -> int:
+    return count_any(text, PLATFORM_NAME_KEYWORDS, cap=len(PLATFORM_NAME_KEYWORDS))
 
 
 def contains_marketplace_surface_text(text: str) -> bool:

@@ -171,6 +171,20 @@ class RankerTests(unittest.TestCase):
         self.assertIn("marketplace", card.tags)
         self.assertTrue(any(trap.name == "platform breadth" for trap in card.traps))
 
+    def test_shopify_dtc_alone_does_not_get_platform_breadth_trap(self) -> None:
+        thesis = load_thesis_dict(
+            {
+                "ref": "P-01",
+                "title": "ListingGuard",
+                "one_liner": "Catalog health agent for Shopify stores",
+                "example_customer": "DTC brands, $100K-$5M",
+                "wedge": "Crawls a Shopify store catalog nightly and sends a fix list for broken product images.",
+            }
+        )
+        card = Ranker().score(thesis)
+
+        self.assertFalse(any(trap.name == "platform breadth" for trap in card.traps))
+
     def test_marketplace_policy_surface_gets_light_platform_trap(self) -> None:
         thesis = load_thesis_dict(
             {
@@ -185,6 +199,21 @@ class RankerTests(unittest.TestCase):
 
         self.assertIn("marketplace", card.tags)
         self.assertTrue(any(trap.name == "marketplace platform" for trap in card.traps))
+
+    def test_multiple_marketplace_platform_names_get_platform_breadth_trap(self) -> None:
+        thesis = load_thesis_dict(
+            {
+                "ref": "M-05",
+                "title": "FeeLeak Copilot",
+                "one_liner": "Drafting assistant for marketplace fee disputes",
+                "example_customer": "Amazon, Walmart, eBay, and Etsy sellers doing $250K-$10M GMV",
+                "wedge": "Drafts fee disputes from settlement files, ad spend, referral fees, storage charges, refunds, shipping labels, and COGS.",
+            }
+        )
+        card = Ranker().score(thesis)
+
+        self.assertIn("marketplace", card.tags)
+        self.assertTrue(any(trap.name == "platform breadth" for trap in card.traps))
 
     def test_generic_marketplace_customer_does_not_lower_platform_access(self) -> None:
         thesis = load_thesis_dict(
