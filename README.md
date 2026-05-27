@@ -64,6 +64,29 @@ The cap matters. If buildability, data access, platform access, or operational s
 python -m unittest discover -s tests
 ```
 
+## Stress Testing
+
+Use the stress harness when you want to throw thousands of private or synthetic ideas at the ranker:
+
+```powershell
+python -m hatch_ranker.stress `
+  --input data/private/ideas.json `
+  --out-dir outputs/stress `
+  --target-size 10000 `
+  --seed 105
+```
+
+Stress mode validates records, skips only invalid ones after logging them, expands the corpus with deterministic adversarial theses, ranks the valid set, and writes:
+
+- `stress_summary.json`
+- `validation_issues.csv`
+- `ranking.json`
+- `ranking.csv`
+- `ranking.md`
+- `ranking_audit.md`
+
+The audit flags suspicious outcomes instead of pretending every ranking is right: severe-trap ideas in the top 5%, no-trap ideas in the bottom 5%, compliance/platform-heavy ideas without caps, non-DTC ideas with DTC-specific rationale, duplicate-title clusters, and domain coverage.
+
 ## Why This Angle
 
 The challenge is not asking for the biggest theoretical startup. It is asking what a Hatch team can actually stand up, get to revenue within 10 weeks, and expand into something durable. This model is designed to make those judgment calls repeatable and inspectable, including when new theses are added live.

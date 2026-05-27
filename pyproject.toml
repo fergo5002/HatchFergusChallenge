@@ -13,6 +13,7 @@ dependencies = []
 
 [project.scripts]
 hatch-rank = "hatch_ranker.cli:main"
+hatch-stress = "hatch_ranker.stress:main"
 
 [tool.setuptools.packages.find]
 include = ["hatch_ranker*"]
