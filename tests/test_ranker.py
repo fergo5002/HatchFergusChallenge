@@ -141,6 +141,67 @@ class RankerTests(unittest.TestCase):
         self.assertIn("compliance", card.tags)
         self.assertTrue(any(trap.name == "compliance scope" for trap in card.traps))
 
+    def test_permit_and_regulatory_language_gets_compliance_scope_trap(self) -> None:
+        thesis = load_thesis_dict(
+            {
+                "ref": "C-02",
+                "title": "HealthPermit Copilot",
+                "one_liner": "Drafting assistant for renewal filing and inspection prep",
+                "example_customer": "Restaurants and commissary kitchens, $100K-$10M",
+                "wedge": "Drafts renewal filing, violation fixes, staff certification, permit checklists, and inspection prep from local requirements.",
+            }
+        )
+        card = Ranker().score(thesis)
+
+        self.assertIn("compliance", card.tags)
+        self.assertTrue(any(trap.name == "compliance scope" for trap in card.traps))
+
+    def test_multi_channel_marketplace_language_gets_platform_breadth_trap(self) -> None:
+        thesis = load_thesis_dict(
+            {
+                "ref": "M-02",
+                "title": "PromoStack Copilot",
+                "one_liner": "Discount-stack monitor across marketplaces and shops",
+                "example_customer": "Brands selling on Shopify, Amazon, TikTok Shop, Faire, and wholesale portals, $300K-$8M",
+                "wedge": "Connects coupon rules, marketplace promos, affiliate codes, wholesale terms, ad calendars, and order exports.",
+            }
+        )
+        card = Ranker().score(thesis)
+
+        self.assertIn("marketplace", card.tags)
+        self.assertTrue(any(trap.name == "platform breadth" for trap in card.traps))
+
+    def test_marketplace_policy_surface_gets_light_platform_trap(self) -> None:
+        thesis = load_thesis_dict(
+            {
+                "ref": "M-03",
+                "title": "AccountHealth Copilot",
+                "one_liner": "Drafting assistant for listing fixes and appeal evidence",
+                "example_customer": "Marketplace-first brands and aggregators, $500K-$25M GMV",
+                "wedge": "Drafts listing fixes, appeal evidence, buyer responses, and shipping defect triage from account health dashboards, policy emails, and listing edits.",
+            }
+        )
+        card = Ranker().score(thesis)
+
+        self.assertIn("marketplace", card.tags)
+        self.assertTrue(any(trap.name == "marketplace platform" for trap in card.traps))
+
+    def test_generic_marketplace_customer_does_not_lower_platform_access(self) -> None:
+        thesis = load_thesis_dict(
+            {
+                "ref": "M-04",
+                "title": "ClaimEvidence Signal",
+                "one_liner": "Early-warning monitor for claims without proof",
+                "example_customer": "consumer brands, suppliers, hospitality groups, and marketplaces, $500K-$50M",
+                "wedge": "Links each public claim to evidence and flags missing support before publishing.",
+            }
+        )
+        card = Ranker().score(thesis)
+
+        self.assertIn("marketplace", card.tags)
+        self.assertGreaterEqual(card.criteria["platform_access"], 70)
+        self.assertFalse(any(trap.name == "marketplace platform" for trap in card.traps))
+
 
 def load_thesis_dict(record):
     with tempfile.TemporaryDirectory() as temp:

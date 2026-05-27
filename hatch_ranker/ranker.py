@@ -402,7 +402,7 @@ def platform_access(text: str, customer_text: str) -> float:
         ),
         cap=4,
     )
-    if contains_any(text, ("amazon", "walmart", "etsy", "stripe")):
+    if contains_any(text, PLATFORM_ACCESS_KEYWORDS):
         score -= 8
     if contains_any(customer_text, ("$50k", "$100k", "sub-$500k", "sub $500k")) and contains_any(
         text, ("checkout extension", "checkout block", "checkout extensions")
@@ -654,7 +654,7 @@ def identify_traps(
                 "The wedge leans on deeper platform APIs or third-party rails that may slow a first release.",
             )
         )
-    if count_any(text, ("amazon", "walmart", "etsy", "stripe"), cap=4) >= 2:
+    if count_channel_mentions(text) >= 2:
         traps.append(
             Trap(
                 "platform breadth",
@@ -662,7 +662,15 @@ def identify_traps(
                 "The first release spans multiple sales channels, so the v1 should start with the thinnest useful ingestion path.",
             )
         )
-    if contains_any(text, ("sales-tax", "sales tax", "nexus", "filing calendar", "regulator packet", "recall-ready", "recall")):
+    elif contains_marketplace_surface_text(text):
+        traps.append(
+            Trap(
+                "marketplace platform",
+                5,
+                "The wedge depends on marketplace policy, exports, listings, or account-health surfaces that can slow the first release.",
+            )
+        )
+    if contains_compliance_scope_text(text):
         traps.append(
             Trap(
                 "compliance scope",
@@ -746,6 +754,8 @@ def compute_viability_cap(criteria: dict[str, float], traps: list[Trap]) -> floa
     if "compliance scope" in trap_names:
         cap = min(cap, 78)
     if "platform breadth" in trap_names:
+        cap = min(cap, 82)
+    if "marketplace platform" in trap_names:
         cap = min(cap, 82)
     return cap
 
@@ -836,8 +846,8 @@ def infer_tags(text: str, customer_text: str) -> list[str]:
         ("b2b", ("wholesale", "b2b", "stockists", "faire")),
         ("marketing", ("email", "sms", "ad creative", "meta", "tiktok", "occasion")),
         ("ai", ("ai", "gpt", "llm", "embedding", "diffusion", "vision")),
-        ("marketplace", ("marketplace", "amazon", "walmart", "etsy")),
-        ("compliance", ("recall", "regulator", "sales-tax", "sales tax", "nexus", "filing")),
+        ("marketplace", MARKETPLACE_TAG_KEYWORDS),
+        ("compliance", COMPLIANCE_KEYWORDS),
         ("operations", ("packaging", "damage", "supplier", "po history", "cogs", "p&l")),
     )
     for tag, needles in checks:
@@ -866,6 +876,85 @@ def parse_revenue_range(text: str) -> RevenueRange | None:
     low = min(amounts[0], amounts[1])
     high = max(amounts[0], amounts[1])
     return RevenueRange(low, high)
+
+
+PLATFORM_NAME_KEYWORDS = (
+    "amazon",
+    "walmart",
+    "etsy",
+    "stripe",
+    "tiktok shop",
+    "tik tok shop",
+    "faire",
+)
+
+
+CHANNEL_BREADTH_KEYWORDS = (
+    "shopify",
+    "dtc",
+    "retail",
+    "wholesale",
+    "wholesale portal",
+    "multi-channel",
+    "multichannel",
+    "pop-up",
+    "pop up",
+    "marketplace",
+    *PLATFORM_NAME_KEYWORDS,
+)
+
+
+MARKETPLACE_PLATFORM_KEYWORDS = (
+    "marketplace-first",
+    "marketplace sellers",
+    "marketplace limits",
+    "marketplace promos",
+    "marketplace facilitator",
+    "account health",
+    "account-health",
+    "listing fixes",
+    "listing edits",
+    "policy emails",
+    "appeal evidence",
+)
+
+
+PLATFORM_ACCESS_KEYWORDS = (*PLATFORM_NAME_KEYWORDS, *MARKETPLACE_PLATFORM_KEYWORDS)
+
+
+MARKETPLACE_TAG_KEYWORDS = ("marketplace", *PLATFORM_NAME_KEYWORDS)
+
+
+COMPLIANCE_KEYWORDS = (
+    "recall",
+    "regulator",
+    "regulatory",
+    "sales-tax",
+    "sales tax",
+    "nexus",
+    "filing",
+    "permit",
+    "certification",
+    "inspection",
+    "biosecurity",
+    "audit packet",
+    "regulator-ready",
+    "epr",
+    "vat",
+    "hazmat",
+)
+
+
+def count_channel_mentions(text: str) -> int:
+    return count_any(text, CHANNEL_BREADTH_KEYWORDS, cap=len(CHANNEL_BREADTH_KEYWORDS))
+
+
+def contains_marketplace_surface_text(text: str) -> bool:
+    return contains_any(text, MARKETPLACE_PLATFORM_KEYWORDS)
+
+
+def contains_compliance_scope_text(text: str) -> bool:
+    return contains_any(text, COMPLIANCE_KEYWORDS)
 
 
 def money_to_number(amount: str, suffix: str) -> float:

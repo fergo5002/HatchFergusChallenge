@@ -27,8 +27,9 @@ SEVERE_TRAPS = {
     "platform gate",
     "platform depth",
     "trust mutation",
-    "compliance scope",
 }
+
+PLATFORM_TRAPS = {"platform breadth", "platform depth", "platform gate", "marketplace platform"}
 
 
 DOMAIN_TEMPLATES: list[dict[str, str]] = [
@@ -418,7 +419,7 @@ def build_audit(cards: list[Scorecard], issues: list[ValidationIssue]) -> str:
         card
         for card in cards
         if ("marketplace" in card.tags or _contains_platform_text(card))
-        and not any(trap.name in {"platform breadth", "platform depth", "platform gate"} for trap in card.traps)
+        and not any(trap.name in PLATFORM_TRAPS for trap in card.traps)
         and card.criteria.get("platform_access", 100) < 70
     ]
 
