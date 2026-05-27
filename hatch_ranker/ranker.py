@@ -148,6 +148,28 @@ def buyer_pain(text: str) -> float:
             "ticket",
             "tickets",
             "emails/dm",
+            "recall",
+            "incident-response",
+            "compliance",
+            "regulator",
+            "sales-tax",
+            "sales tax",
+            "nexus",
+            "filing",
+            "accountant-ready",
+            "profit truth",
+            "losing money",
+            "cogs",
+            "marketplace fees",
+            "storage",
+            "damage-rate",
+            "breakage",
+            "damage refunds",
+            "supplier reliability",
+            "late deliveries",
+            "defect",
+            "price drift",
+            "moq creep",
         ),
         cap=5,
     )
@@ -185,6 +207,21 @@ def roi_visibility(text: str) -> float:
             "ticket",
             "tickets",
             "eta",
+            "profit",
+            "p&l",
+            "cogs",
+            "fees",
+            "storage",
+            "losing money",
+            "expected savings",
+            "damage refunds",
+            "lower dim weight",
+            "sales-tax",
+            "sales tax",
+            "nexus",
+            "recall",
+            "regulator",
+            "proof trail",
         ),
         cap=5,
     )
@@ -199,7 +236,7 @@ def buyer_clarity(thesis: Thesis, revenue: RevenueRange | None) -> float:
         score += 13
     if contains_any(text, ("apparel", "beauty", "supplements", "skincare", "footwear", "pet", "home")):
         score += 8
-    if contains_any(text, ("dtc brands", "shopify", "stores")):
+    if contains_any(text, ("dtc brands", "shopify", "stores", "marketplace", "sellers", "retailers")):
         score += 5
     if contains_any(text, ("sub-$", "sub $", "$1k-50k")):
         score -= 8
@@ -227,6 +264,9 @@ def low_setup_friction(text: str) -> float:
             "drag-and-drop",
             "native shopify",
             "morning fix list",
+            "checklists",
+            "calendar",
+            "exports",
         ),
         cap=4,
     )
@@ -245,6 +285,10 @@ def low_setup_friction(text: str) -> float:
             "3 product photos",
             "front, back, side",
             "experience level",
+            "regulator packet",
+            "registration",
+            "messy inbox",
+            "email threads",
         ),
         cap=5,
     )
@@ -270,7 +314,7 @@ def market_access(customer_text: str, revenue: RevenueRange | None) -> float:
             score = 64
         elif not high and low >= 500_000:
             score = 66
-    if contains_any(customer_text, ("dtc brands", "shopify")):
+    if contains_any(customer_text, ("dtc brands", "shopify", "marketplace", "sellers", "retailers")):
         score += 5
     if contains_any(customer_text, ("reptile", "lingerie")):
         score -= 9
@@ -299,6 +343,10 @@ def buildability(text: str) -> float:
             "one-click",
             "queue",
             "bulk fixes",
+            "scorecard",
+            "checklists",
+            "exports",
+            "calendar",
         ),
         cap=5,
     )
@@ -322,6 +370,9 @@ def buildability(text: str) -> float:
             "computer vision",
             "auto-resolves",
             "zero human",
+            "messy inbox",
+            "email threads",
+            "regulator packet",
         ),
         cap=6,
     )
@@ -351,11 +402,13 @@ def platform_access(text: str, customer_text: str) -> float:
         ),
         cap=4,
     )
+    if contains_any(text, ("amazon", "walmart", "etsy", "stripe")):
+        score -= 8
     if contains_any(customer_text, ("$50k", "$100k", "sub-$500k", "sub $500k")) and contains_any(
         text, ("checkout extension", "checkout block", "checkout extensions")
     ):
         score -= 12
-    if contains_any(text, ("theme app extension", "metafield", "liquid", "shopify email", "shopify orders")):
+    if contains_any(text, ("theme app extension", "metafield", "liquid", "shopify email", "shopify orders", "exports")):
         score += 7
     return clamp(score)
 
@@ -378,6 +431,13 @@ def data_access(text: str, customer_text: str, revenue: RevenueRange | None) -> 
             "exchange data",
             "sold-order",
             "behavioral profile",
+            "supplier coas",
+            "batch ids",
+            "lot-level",
+            "messy inbox",
+            "email threads",
+            "invoices",
+            "shipping notices",
         ),
         cap=6,
     )
@@ -409,6 +469,12 @@ def operational_simplicity(text: str) -> float:
             "zero human",
             "re-prices",
             "price mutation",
+            "recall",
+            "regulator packet",
+            "registration",
+            "filing calendar",
+            "messy inbox",
+            "email threads",
         ),
         cap=4,
     )
@@ -438,6 +504,17 @@ def expansion_surface(text: str) -> float:
             "catalog health",
             "stockists",
             "loyalty",
+            "profit truth",
+            "sku p&l",
+            "marketplace",
+            "sales-tax",
+            "sales tax",
+            "nexus",
+            "recall",
+            "compliance",
+            "supplier reliability",
+            "negotiation briefs",
+            "damage-rate",
         ),
         cap=5,
     )
@@ -465,6 +542,10 @@ def differentiation(text: str) -> float:
             "queue-and-drip",
             "product is locked",
             "no customer portal",
+            "profit truth",
+            "proof trail",
+            "negotiation briefs",
+            "without becoming a full tax filing platform",
         ),
         cap=5,
     )
@@ -505,6 +586,13 @@ def defensibility(text: str) -> float:
             "stockists",
             "supplier",
             "catalog every night",
+            "batch ids",
+            "lot-level",
+            "proof trail",
+            "sku p&l",
+            "score suppliers",
+            "po history",
+            "invoices",
         ),
         cap=5,
     )
@@ -549,12 +637,37 @@ def identify_traps(
                 "Checkout surfaces can be gated by Shopify plan/API constraints, especially for smaller merchants.",
             )
         )
-    if contains_any(text, ("cart transform", "shopify functions", "shopify pos", "shopify payouts", "visa/mc account updater")):
+    if contains_any(
+        text,
+        (
+            "cart transform",
+            "shopify functions",
+            "shopify pos",
+            "shopify payouts",
+            "visa/mc account updater",
+        ),
+    ):
         traps.append(
             Trap(
                 "platform depth",
                 8,
                 "The wedge leans on deeper platform APIs or third-party rails that may slow a first release.",
+            )
+        )
+    if count_any(text, ("amazon", "walmart", "etsy", "stripe"), cap=4) >= 2:
+        traps.append(
+            Trap(
+                "platform breadth",
+                5,
+                "The first release spans multiple sales channels, so the v1 should start with the thinnest useful ingestion path.",
+            )
+        )
+    if contains_any(text, ("sales-tax", "sales tax", "nexus", "filing calendar", "regulator packet", "recall-ready", "recall")):
+        traps.append(
+            Trap(
+                "compliance scope",
+                4,
+                "Compliance pain is real, but the v1 must avoid becoming regulated workflow infrastructure before the first sale.",
             )
         )
     if contains_any(
@@ -630,6 +743,10 @@ def compute_viability_cap(criteria: dict[str, float], traps: list[Trap]) -> floa
         cap = min(cap, 68)
     if "thin data" in trap_names:
         cap = min(cap, 70)
+    if "compliance scope" in trap_names:
+        cap = min(cap, 78)
+    if "platform breadth" in trap_names:
+        cap = min(cap, 82)
     return cap
 
 
@@ -647,7 +764,7 @@ def make_rationale(card: Scorecard) -> str:
     if c["expansion_surface"] >= 76:
         positives.append("room to expand beyond the wedge")
     if c["market_access"] >= 76:
-        positives.append("reachable mid-market DTC buyer")
+        positives.append("reachable mid-market buyer")
     if not positives:
         positives.append("balanced but not exceptional fundamentals")
 
@@ -719,6 +836,9 @@ def infer_tags(text: str, customer_text: str) -> list[str]:
         ("b2b", ("wholesale", "b2b", "stockists", "faire")),
         ("marketing", ("email", "sms", "ad creative", "meta", "tiktok", "occasion")),
         ("ai", ("ai", "gpt", "llm", "embedding", "diffusion", "vision")),
+        ("marketplace", ("marketplace", "amazon", "walmart", "etsy")),
+        ("compliance", ("recall", "regulator", "sales-tax", "sales tax", "nexus", "filing")),
+        ("operations", ("packaging", "damage", "supplier", "po history", "cogs", "p&l")),
     )
     for tag, needles in checks:
         if contains_any(text, needles):

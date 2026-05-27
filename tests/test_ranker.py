@@ -111,6 +111,36 @@ class RankerTests(unittest.TestCase):
             self.assertEqual(len(ranked), 2)
             self.assertEqual(sum(1 for card in ranked if card.thesis and card.thesis.is_new), 1)
 
+    def test_marketplace_thesis_is_not_explained_as_dtc_only(self) -> None:
+        thesis = load_thesis_dict(
+            {
+                "ref": "M-01",
+                "title": "MarginMap",
+                "one_liner": "SKU-level profit truth for Amazon and Etsy sellers",
+                "example_customer": "Marketplace-first sellers doing $250K-$5M GMV",
+                "wedge": "Pulls marketplace fees, refunds, storage, shipping, returns, promos, and COGS into a SKU P&L.",
+            }
+        )
+        card = Ranker().score(thesis)
+
+        self.assertIn("marketplace", card.tags)
+        self.assertNotIn("DTC buyer", card.rationale)
+
+    def test_compliance_thesis_gets_explicit_scope_trap(self) -> None:
+        thesis = load_thesis_dict(
+            {
+                "ref": "C-01",
+                "title": "RecallReady",
+                "one_liner": "Recall and incident-response OS for consumables brands",
+                "example_customer": "Supplements and pet food brands, $500K-$10M",
+                "wedge": "Creates recall-ready regulator packets, affected customer lists, and proof trails from batch IDs and complaints.",
+            }
+        )
+        card = Ranker().score(thesis)
+
+        self.assertIn("compliance", card.tags)
+        self.assertTrue(any(trap.name == "compliance scope" for trap in card.traps))
+
 
 def load_thesis_dict(record):
     with tempfile.TemporaryDirectory() as temp:
