@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hatch-fergus-challenge"
+version = "0.1.0"
+description = "Deterministic 10-week revenue survivability ranker for Hatch105 startup theses."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Fergus O'Reilly" }]
+dependencies = []
+
+[project.scripts]
+hatch-rank = "hatch_ranker.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["hatch_ranker*"]

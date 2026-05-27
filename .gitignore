@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+
+# Challenge inputs and generated thesis-level outputs are confidential.
+data/
+outputs/
+candidate_theses.csv
+candidate_theses.json
+Hatch105 Build Challenge.html
