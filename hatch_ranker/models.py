@@ -54,12 +54,19 @@ class Scorecard:
     smallest_v1: str = ""
     evidence: list[str] = field(default_factory=list)
     thesis: Thesis | None = None
+    # v2 fields: concept-anchor layer + tier system
+    fired_concepts: dict[str, list[str]] = field(default_factory=dict)
+    saturation: dict[str, Any] = field(default_factory=dict)
+    percentile: float = 0.0
+    tier: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "rank": self.rank,
             "ref": self.ref,
             "title": self.title,
+            "tier": self.tier,
+            "percentile": round(self.percentile, 1),
             "score": round(self.final_score, 2),
             "cash_velocity": round(self.cash_velocity, 2),
             "v1_viability": round(self.v1_viability, 2),
@@ -74,6 +81,8 @@ class Scorecard:
                 }
                 for trap in self.traps
             ],
+            "fired_concepts": self.fired_concepts,
+            "saturation": self.saturation,
             "tags": self.tags,
             "rationale": self.rationale,
             "smallest_v1": self.smallest_v1,

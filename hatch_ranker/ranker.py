@@ -5,6 +5,12 @@ import unicodedata
 from dataclasses import dataclass
 from statistics import mean
 
+from hatch_ranker.concepts import (
+    CRITERION_CONCEPTS,
+    SaturationHit,
+    concept_adjustment,
+    detect_saturation,
+)
 from hatch_ranker.models import Scorecard, Thesis, Trap
 
 
@@ -27,6 +33,7 @@ class Ranker:
         cards.sort(key=lambda card: (-card.final_score, card.thesis.source_index if card.thesis else 0))
         for index, card in enumerate(cards, start=1):
             card.rank = index
+        annotate_tiers(cards)
         return cards
 
     def score(self, thesis: Thesis) -> Scorecard:
@@ -35,7 +42,8 @@ class Ranker:
         revenue = parse_revenue_range(thesis.example_customer)
         tags = infer_tags(text, customer_text)
 
-        criteria = {
+        # Step 1: keyword-based criteria (the original rubric)
+        keyword_criteria = {
             "buyer_pain": buyer_pain(text),
             "roi_visibility": roi_visibility(text),
             "buyer_clarity": buyer_clarity(thesis, revenue),
@@ -49,6 +57,14 @@ class Ranker:
             "differentiation": differentiation(text),
             "defensibility": defensibility(text),
         }
+
+        # Step 2: concept-anchor blend (improvement A)
+        criteria: dict[str, float] = {}
+        fired_concepts: dict[str, list[str]] = {}
+        for name, keyword_score in keyword_criteria.items():
+            adjustment, fired = concept_adjustment(text, name)
+            criteria[name] = clamp(keyword_score + adjustment)
+            fired_concepts[name] = fired
 
         cash_velocity = weighted_average(
             (
@@ -77,7 +93,16 @@ class Ranker:
         )
 
         traps = identify_traps(text, customer_text, revenue, criteria)
+
+        # Step 3: saturated-category trap + cap (improvement B)
+        saturation_hit = detect_saturation(text)
+        if saturation_hit is not None:
+            traps.append(_saturated_category_trap(saturation_hit, criteria))
+
         viability_cap = compute_viability_cap(criteria, traps)
+        if saturation_hit is not None:
+            viability_cap = _apply_saturation_cap(viability_cap, saturation_hit)
+
         raw_score = weighted_average(
             (
                 (cash_velocity, 0.48),
@@ -87,6 +112,15 @@ class Ranker:
         )
         penalty = sum(trap.penalty for trap in traps)
         final_score = clamp(min(raw_score, viability_cap) - penalty, 0, 100)
+
+        saturation_payload: dict[str, object] = {}
+        if saturation_hit is not None:
+            saturation_payload = {
+                "name": saturation_hit.name,
+                "label": saturation_hit.label,
+                "density": round(saturation_hit.density, 2),
+                "incumbents": saturation_hit.incumbents,
+            }
 
         card = Scorecard(
             ref=thesis.ref,
@@ -100,6 +134,8 @@ class Ranker:
             traps=traps,
             tags=tags,
             thesis=thesis,
+            fired_concepts=fired_concepts,
+            saturation=saturation_payload,
         )
         card.rationale = make_rationale(card)
         card.smallest_v1 = smallest_sellable_v1(card)
@@ -109,6 +145,75 @@ class Ranker:
 
 def rank_theses(theses: list[Thesis]) -> list[Scorecard]:
     return Ranker().rank(theses)
+
+
+# ---------------------------------------------------------------------------
+# Improvement B: saturated-category trap + cap
+# ---------------------------------------------------------------------------
+
+
+def _saturated_category_trap(hit: SaturationHit, criteria: dict[str, float]) -> Trap:
+    has_strong_differentiation = (
+        criteria.get("differentiation", 0) >= 70
+        or criteria.get("defensibility", 0) >= 70
+    )
+    base_penalty = (hit.density - 0.5) * 10  # 0.7 -> 2, 0.85 -> 3.5, 0.95 -> 4.5
+    penalty = round(base_penalty * (0.5 if has_strong_differentiation else 1.0), 1)
+    if penalty < 0:
+        penalty = 0
+    reason = (
+        f"Crowded category ({hit.label}). Strong incumbents already present: "
+        f"{hit.incumbents}. The wedge must do more than re-bundle them."
+    )
+    return Trap("saturated category", penalty, reason)
+
+
+def _apply_saturation_cap(cap: float, hit: SaturationHit) -> float:
+    if hit.density >= 0.85:
+        return min(cap, 72)
+    if hit.density >= 0.70:
+        return min(cap, 78)
+    return cap
+
+
+# ---------------------------------------------------------------------------
+# Improvement C: percentile + tier annotation
+# ---------------------------------------------------------------------------
+
+
+SEVERE_TRAPS_FOR_TIER: frozenset[str] = frozenset(
+    {"technical swamp", "platform gate", "trust mutation"}
+)
+
+
+def annotate_tiers(cards: list[Scorecard]) -> None:
+    """Mutate cards to add ``percentile`` and ``tier`` fields after ranking.
+
+    Tier bands are calibrated against the corpus actually present, so the tier
+    of a thesis can shift when a live rerank changes the population. That is
+    the point: a thesis is judged against its peers, not against a hardcoded
+    score threshold that may not match the current set.
+    """
+
+    n = len(cards)
+    if n == 0:
+        return
+    for card in cards:
+        percentile = (n - card.rank + 1) / n * 100
+        card.percentile = round(percentile, 1)
+        card.tier = _tier_for(card)
+
+
+def _tier_for(card: Scorecard) -> str:
+    if any(trap.name in SEVERE_TRAPS_FOR_TIER for trap in card.traps) and card.final_score < 50:
+        return "Trap"
+    if card.percentile >= 90:
+        return "Top Tier"
+    if card.percentile >= 70:
+        return "Strong"
+    if card.percentile >= 30:
+        return "Watch"
+    return "Trap"
 
 
 def buyer_pain(text: str) -> float:
@@ -821,8 +926,16 @@ def make_evidence(thesis: Thesis, card: Scorecard, revenue: RevenueRange | None)
         high = f"${revenue.high:,.0f}" if revenue.high else "open-ended"
         low = f"${revenue.low:,.0f}" if revenue.low else "$0"
         evidence.append(f"Inferred: stated revenue band is roughly {low} to {high}.")
+    if card.saturation:
+        evidence.append(
+            "Saturation: '{label}' (density {density:.2f}). Incumbents: {incumbents}.".format(
+                label=card.saturation["label"],
+                density=float(card.saturation["density"]),
+                incumbents=card.saturation["incumbents"],
+            )
+        )
     evidence.append(
-        "Inferred: scores are from the thesis text only; no deep market research was used."
+        "Inferred: scores are from the thesis text only; verify market claims before commit."
     )
     if card.traps:
         evidence.append(

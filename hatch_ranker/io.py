@@ -104,6 +104,8 @@ def _write_json(cards: list[Scorecard], path: Path) -> None:
 def _write_csv(cards: list[Scorecard], path: Path) -> None:
     fieldnames = [
         "rank",
+        "tier",
+        "percentile",
         "ref",
         "title",
         "score",
@@ -113,6 +115,7 @@ def _write_csv(cards: list[Scorecard], path: Path) -> None:
         "viability_cap",
         "tags",
         "traps",
+        "saturation",
         "rationale",
         "is_new",
     ]
@@ -121,9 +124,14 @@ def _write_csv(cards: list[Scorecard], path: Path) -> None:
         writer.writeheader()
         for card in cards:
             row = card.to_dict()
+            saturation_label = ""
+            if row.get("saturation"):
+                saturation_label = str(row["saturation"].get("label", ""))
             writer.writerow(
                 {
                     "rank": row["rank"],
+                    "tier": row.get("tier", ""),
+                    "percentile": row.get("percentile", 0),
                     "ref": row["ref"],
                     "title": row["title"],
                     "score": row["score"],
@@ -133,6 +141,7 @@ def _write_csv(cards: list[Scorecard], path: Path) -> None:
                     "viability_cap": row["viability_cap"],
                     "tags": "; ".join(row["tags"]),
                     "traps": "; ".join(trap["name"] for trap in row["traps"]),
+                    "saturation": saturation_label,
                     "rationale": row["rationale"],
                     "is_new": row["is_new"],
                 }
@@ -144,33 +153,42 @@ def _write_markdown(cards: list[Scorecard], path: Path, *, top_n: int) -> None:
     lines = [
         "# Hatch105 Thesis Ranking",
         "",
-        "Algorithm: 10-week revenue survivability ranker.",
+        "Algorithm v2: 10-week revenue survivability ranker with concept-anchor blend, saturated-category trap, and tier system.",
         "",
-        "The score is deterministic and inspectable. It rewards quick revenue learning, buildable v1 scope, and long-term company surface, then applies caps/penalties for hidden traps.",
+        "The score is deterministic and inspectable. It rewards quick revenue learning, buildable v1 scope, and long-term company surface, then applies caps/penalties for hidden traps and saturated categories.",
         "",
         "## Criteria",
         "",
         "- Cash velocity: buyer pain, ROI visibility, buyer clarity, setup friction, and target-market accessibility.",
         "- V1 viability: buildability, platform access, data access, and operational simplicity.",
         "- Company potential: expansion surface, differentiation, repeatability, and defensibility.",
-        "- Trap handling: severe technical, platform, trust, data, novelty, and clone risks cap or penalize the final score.",
+        "- Trap handling: severe technical, platform, trust, data, novelty, clone, and saturated-category risks cap or penalize the final score.",
+        "- Concept-anchor blend: each keyword criterion is adjusted by +/- 20 based on which broader concepts fire, so synonym drift in new theses does not collapse a score to baseline.",
+        "- Tier: Top Tier / Strong / Watch / Trap, calibrated against the actual corpus percentile.",
+        "",
+        "## Tier Summary",
+        "",
+        _tier_summary(cards),
         "",
         "## Ranking",
         "",
-        "| Rank | Ref | Title | Score | Cash | V1 | Company | Traps | Rationale |",
-        "|---:|---|---|---:|---:|---:|---:|---|---|",
+        "| Rank | Tier | Ref | Title | Score | Cash | V1 | Company | Saturation | Traps | Rationale |",
+        "|---:|---|---|---|---:|---:|---:|---:|---|---|---|",
     ]
     for card in visible:
         traps = ", ".join(trap.name for trap in card.traps) or "-"
+        saturation_label = str(card.saturation.get("label", "")) if card.saturation else "-"
         lines.append(
-            "| {rank} | {ref} | {title} | {score:.1f} | {cash:.1f} | {v1:.1f} | {company:.1f} | {traps} | {rationale} |".format(
+            "| {rank} | {tier} | {ref} | {title} | {score:.1f} | {cash:.1f} | {v1:.1f} | {company:.1f} | {sat} | {traps} | {rationale} |".format(
                 rank=card.rank,
+                tier=_escape_md(card.tier),
                 ref=_escape_md(card.ref),
                 title=_escape_md(card.title),
                 score=card.final_score,
                 cash=card.cash_velocity,
                 v1=card.v1_viability,
                 company=card.company_potential,
+                sat=_escape_md(saturation_label),
                 traps=_escape_md(traps),
                 rationale=_escape_md(card.rationale),
             )
@@ -206,3 +224,18 @@ def _write_markdown(cards: list[Scorecard], path: Path, *, top_n: int) -> None:
 
 def _escape_md(value: str) -> str:
     return value.replace("|", "\\|").replace("\n", " ")
+
+
+def _tier_summary(cards: list[Scorecard]) -> str:
+    tier_order = ("Top Tier", "Strong", "Watch", "Trap")
+    counts = {tier: 0 for tier in tier_order}
+    for card in cards:
+        if card.tier in counts:
+            counts[card.tier] += 1
+    lines = ["| Tier | Count | Refs |", "|---|---:|---|"]
+    for tier in tier_order:
+        refs = ", ".join(
+            card.ref for card in cards if card.tier == tier
+        )
+        lines.append(f"| {tier} | {counts[tier]} | {refs or '-'} |")
+    return "\n".join(lines)
