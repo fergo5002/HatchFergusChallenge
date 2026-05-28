@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hatch Ranker UI</title>
+    <meta
+      name="description"
+      content="A local, inspectable UI for ranking Hatch105 startup theses with the deterministic ranker."
+    >
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#ranking">Skip to ranking</a>
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">10-week revenue survivability</p>
+        <h1>Hatch Ranker</h1>
+      </div>
+      <p class="lede">
+        Paste the specified JSON format, replace or append to the current list,
+        then inspect the ranking and score logic.
+      </p>
+    </header>
+
+    <main class="layout">
+      <section class="input-panel" aria-labelledby="input-title">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Input</p>
+            <h2 id="input-title">JSON list</h2>
+          </div>
+          <span id="stored-count" class="count-pill">0 saved</span>
+        </div>
+
+        <p id="json-help" class="help-text">
+          Use a JSON array, or an object with <code>theses</code> or <code>items</code>.
+          Each idea needs <code>ref</code>, <code>title</code>, <code>one_liner</code>,
+          <code>example_customer</code>, and <code>wedge</code>.
+        </p>
+
+        <label class="file-label" for="json-file">Load JSON file</label>
+        <input id="json-file" type="file" accept="application/json,.json">
+
+        <label class="textarea-label" for="json-input">Paste JSON</label>
+        <textarea
+          id="json-input"
+          spellcheck="false"
+          aria-describedby="json-help status-message"
+          placeholder='[{"ref":"H-01","title":"Restock OS","one_liner":"...","example_customer":"DTC brands, $200K-$3M","wedge":"..."}]'
+        ></textarea>
+
+        <div class="button-row" aria-label="JSON actions">
+          <button id="replace-button" type="button">Replace list</button>
+          <button id="append-button" type="button" class="secondary">Append list</button>
+          <button id="export-button" type="button" class="secondary">Export source JSON</button>
+          <button id="clear-button" type="button" class="quiet">Clear</button>
+        </div>
+
+        <div id="status-message" class="status-message" role="status" aria-live="polite"></div>
+        <div id="error-list" class="error-list" aria-live="assertive"></div>
+      </section>
+
+      <section id="ranking" class="ranking-panel" aria-labelledby="ranking-title">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Output</p>
+            <h2 id="ranking-title">Ranking</h2>
+          </div>
+          <div id="summary-stats" class="summary-stats" aria-label="Ranking summary"></div>
+        </div>
+
+        <div id="empty-state" class="empty-state">
+          <strong>No ideas ranked yet.</strong>
+          <span>Paste or load JSON, then choose Replace list or Append list.</span>
+        </div>
+
+        <div id="tier-summary" class="tier-summary" aria-label="Tier summary"></div>
+
+        <div id="cards" class="cards" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>
