@@ -10,13 +10,18 @@ by Vercel's static handler before requests reach this entrypoint.
 from __future__ import annotations
 
 import json
+import mimetypes
 import os
 import sys
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler
+from pathlib import Path
 from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PUBLIC_DIR = PROJECT_ROOT / "public"
 
 from hatch_ranker.web import (  # noqa: E402
     ai_scan_payload,
@@ -32,13 +37,34 @@ class handler(BaseHTTPRequestHandler):
     server_version = "HatchRankerVercel/0.1"
 
     def do_GET(self) -> None:
-        # Static assets are served by Vercel before reaching here. If a
-        # GET arrives we return a small JSON health response.
         route = urlparse(self.path).path
         if route in {"/api", "/api/", "/api/health"}:
             self._send_json(HTTPStatus.OK, {"ok": True, "service": "hatch-ranker"})
             return
+        # Vercel's static handler serves /styles.css, /app.js etc. directly,
+        # but bare "/" falls through to this entrypoint. Serve index.html.
+        if route in {"/", "/index.html"}:
+            self._serve_static("index.html")
+            return
+        if route in {"/styles.css", "/app.js"}:
+            self._serve_static(route.lstrip("/"))
+            return
         self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Not found"})
+
+    def _serve_static(self, name: str) -> None:
+        path = PUBLIC_DIR / name
+        try:
+            data = path.read_bytes()
+        except FileNotFoundError:
+            self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Not found"})
+            return
+        content_type = mimetypes.guess_type(name)[0] or "application/octet-stream"
+        self.send_response(HTTPStatus.OK)
+        self.send_header("Content-Type", f"{content_type}; charset=utf-8")
+        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Cache-Control", "public, max-age=300")
+        self.end_headers()
+        self.wfile.write(data)
 
     def do_POST(self) -> None:
         route = urlparse(self.path).path
