@@ -21,3 +21,6 @@ include = ["hatch_ranker*"]
 
 [tool.setuptools.package-data]
 "hatch_ranker.web_static" = ["*.html", "*.css", "*.js"]
+
+[tool.vercel]
+entrypoint = "api.index:handler"
