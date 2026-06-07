@@ -15,13 +15,15 @@ import os
 import sys
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler
-from pathlib import Path
+from importlib import resources
 from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-PUBLIC_DIR = PROJECT_ROOT / "public"
+# Static assets are read from the hatch_ranker.web_static package so they
+# are guaranteed to be present in the Vercel function bundle (the public/
+# directory is only deployed to the static CDN, not to the function).
+STATIC_PACKAGE = "hatch_ranker.web_static"
 
 from hatch_ranker.web import (  # noqa: E402
     ai_scan_payload,
@@ -49,14 +51,13 @@ class handler(BaseHTTPRequestHandler):
         if route in {"/styles.css", "/app.js"}:
             self._serve_static(route.lstrip("/"))
             return
-        self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Not found", "raw_path": self.path, "route": route})
+        self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Not found"})
 
     def _serve_static(self, name: str) -> None:
-        path = PUBLIC_DIR / name
         try:
-            data = path.read_bytes()
-        except FileNotFoundError:
-            self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Not found"})
+            data = resources.files(STATIC_PACKAGE).joinpath(name).read_bytes()
+        except (FileNotFoundError, ModuleNotFoundError):
+            self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Static asset not found", "name": name})
             return
         content_type = mimetypes.guess_type(name)[0] or "application/octet-stream"
         self.send_response(HTTPStatus.OK)
