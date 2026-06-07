@@ -19,3 +19,5 @@ Hatch105 Build Challenge.html
 # Local secrets - never commit
 .env
 .env.*
+
+.vercel

@@ -1,0 +1,26 @@
+# Local-only artefacts and secrets that must never reach Vercel.
+.env
+.env.*
+.git
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.mypy_cache
+.ruff_cache
+dist
+build
+*.egg-info
+
+# Confidential challenge inputs and locally generated outputs.
+data
+outputs
+outputs-*
+candidate_theses.csv
+candidate_theses.json
+Hatch105 Build Challenge.html
+
+# Local Python sources we don't need on the server (Vercel only needs hatch_ranker package + api/).
+tests
