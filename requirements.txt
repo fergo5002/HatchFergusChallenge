@@ -1,0 +1,2 @@
+# Hatch Ranker runs on the Python standard library only.
+# Listed here so Vercel detects this as a Python project.

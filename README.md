@@ -28,6 +28,18 @@ python -m hatch_ranker.cli `
   --out-dir outputs-live
 ```
 
+## Local UI
+
+Run the browser UI when you want to paste, replace, append, and rerank JSON lists interactively:
+
+```powershell
+python -m hatch_ranker.web --port 8765
+```
+
+Then open `http://127.0.0.1:8765`. The UI accepts the same JSON shape as the CLI: a list of thesis objects, or an object with `theses` or `items`. Appended ideas are kept in browser local storage and marked as new while the combined list is reranked.
+
+To enable the optional AI edge-case scan, add `GROQ_API_KEY` to a local `.env` file before starting the UI. The scan runs only when you click the button, sends the current ranked cards in one batched request, and returns short risk/opportunity observations for cases the fixed rulebook may miss.
+
 ## Model
 
 The algorithm scores each thesis across three groups:

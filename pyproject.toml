@@ -14,6 +14,10 @@ dependencies = []
 [project.scripts]
 hatch-rank = "hatch_ranker.cli:main"
 hatch-stress = "hatch_ranker.stress:main"
+hatch-ui = "hatch_ranker.web:main"
 
 [tool.setuptools.packages.find]
 include = ["hatch_ranker*"]
+
+[tool.setuptools.package-data]
+"hatch_ranker.web_static" = ["*.html", "*.css", "*.js"]

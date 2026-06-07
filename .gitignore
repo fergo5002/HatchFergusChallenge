@@ -15,3 +15,7 @@ outputs/
 candidate_theses.csv
 candidate_theses.json
 Hatch105 Build Challenge.html
+
+# Local secrets - never commit
+.env
+.env.*
