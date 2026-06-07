@@ -394,7 +394,7 @@ function renderAiObservations(card) {
     return null;
   }
   const section = element("section", "ai-observations");
-  section.append(element("strong", "", "AI observations"));
+  section.append(element("strong", "", "AI observations (advisory — does not change rank or score)"));
   if (observations.length === 0) {
     section.append(element("p", "ai-observation-empty", "No edge cases flagged for this card."));
     return section;
@@ -436,6 +436,10 @@ async function runAiScan() {
 
     const observationsByRef = groupAiObservations(payload.observations || []);
     aiScanHasRun = true;
+    // Additive-only: map over the deterministic ranking in its existing order
+    // and attach observations as a new `ai_observations` field. We never
+    // re-sort and never touch score/rank/tier, so the AI advances the ranking
+    // without interfering with it. Do not change this to sort by AI output.
     const merged = currentRanking.map((card) => ({
       ...card,
       ai_observations: observationsByRef.get(card.ref) || [],

@@ -14,8 +14,26 @@ catch:
     3. Hidden upside - strengths the rubric undervalues.
     4. Coherence smells - keyword-stuffed, vague, or contradictory wedge.
 
-Output is a `{ref: [Observation]}` map. The model is asked to return strict
-JSON; we tolerate code fences and stray prose around the JSON object.
+Output is a flat list of `Observation(ref, kind, note)`. The model is asked to
+return strict JSON; we tolerate code fences and stray prose around the JSON
+object.
+
+Non-interference contract
+-------------------------
+This module *advances* the deterministic ranking; it must never *interfere*
+with it. Concretely:
+
+* It only reads the ranked cards (via `_summarise_card`) to build the prompt -
+  it never mutates them.
+* Its only output type is `Observation`, a frozen dataclass with exactly three
+  fields (ref, kind, note). It cannot carry a score, rank, tier, or order, so
+  nothing it returns can feed back into the score.
+* `ranker.py` does not import this module, so scoring is computed and finished
+  before any scan can run.
+
+If you extend this module, keep the output advisory-only. Anything that could
+re-order or re-score cards belongs in `ranker.py`, behind the auditable rules,
+not here. The guards in `tests/test_ai_separation.py` enforce this.
 """
 
 from __future__ import annotations

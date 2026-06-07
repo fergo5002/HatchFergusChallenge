@@ -63,7 +63,13 @@ def root_issue(message: str) -> ValidationIssue:
 
 
 def ai_scan_payload(payload: Any) -> tuple[int, dict[str, Any]]:
-    """Run the AI edge-case scan and return a JSON-ready response."""
+    """Run the AI edge-case scan and return a JSON-ready response.
+
+    The response carries advisory observations only (ref, kind, note). It never
+    returns a ranking, score, tier, or order, so the AI can augment the
+    deterministic ranking but can never alter it. See ai_scan.py for the full
+    non-interference contract; tests/test_ai_separation.py guards it.
+    """
 
     if isinstance(payload, dict):
         cards = payload.get("ranking") or payload.get("cards") or payload.get("items")
