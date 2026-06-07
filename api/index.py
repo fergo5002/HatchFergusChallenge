@@ -49,7 +49,7 @@ class handler(BaseHTTPRequestHandler):
         if route in {"/styles.css", "/app.js"}:
             self._serve_static(route.lstrip("/"))
             return
-        self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Not found"})
+        self._send_json(HTTPStatus.NOT_FOUND, {"ok": False, "error": "Not found", "raw_path": self.path, "route": route})
 
     def _serve_static(self, name: str) -> None:
         path = PUBLIC_DIR / name
