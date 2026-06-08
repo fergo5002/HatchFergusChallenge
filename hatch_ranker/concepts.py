@@ -167,6 +167,7 @@ CONCEPTS: dict[str, Concept] = {
             "recover", "recovered", "lift", "uplift", "increase",
             "boost conversion", "convert", "conversion rate", "aov", "ltv",
             "repeat purchase", "reorder rate",
+            "reactivation", "reactivation sequence",
         ),
     ),
     "measurable_cost_save": Concept(
@@ -175,6 +176,7 @@ CONCEPTS: dict[str, Concept] = {
             "reduce cost", "save cost", "cut cost", "lower fees",
             "fewer refunds", "less waste", "expected savings",
             "lower dim", "fewer chargebacks", "save margin",
+            "returnless refund", "deflect returns", "lower return rate",
         ),
     ),
     "aesthetic_no_metric": Concept(
@@ -222,6 +224,7 @@ CONCEPTS: dict[str, Concept] = {
             "voice clone", "voice-clone", "voice questions", "voice answer",
             "3d mesh", "ar try-on", "ar try on", "diffusion",
             "generative 3d", "size recommendation",
+            "voice commerce", "conversational checkout", "real-time voice",
         ),
     ),
     "platform_gated_build": Concept(
@@ -231,6 +234,7 @@ CONCEPTS: dict[str, Concept] = {
             "cart transform", "shopify functions", "shopify pos",
             "pos return", "shopify payouts", "account updater",
             "visa/mc account",
+            "agentic checkout protocol", "universal commerce protocol", "checkout kit",
         ),
     ),
     "third_party_integration_dep": Concept(
@@ -279,6 +283,7 @@ CONCEPTS: dict[str, Concept] = {
             "automatically re-prices", "automatically reprices",
             "auto-replies", "fully autonomous", "price mutation",
             "automatic refund", "automatic message", "speaks for the",
+            "autonomous buying agent", "auto-issues refunds", "agentic checkout", "fully autonomous",
         ),
     ),
 
@@ -352,6 +357,7 @@ CONCEPTS: dict[str, Concept] = {
             "flat monthly", "flat €", "flat eur", "killing", "lite",
             "lite version", "gorgiaslite", "cheaper than", "alternative to",
             "$29/mo vs", "$79/mo", "no per-",
+            "drop-in replacement", "fraction of the price", "fraction of the cost", "undercut",
         ),
     ),
     "novelty_consumer_behavior": Concept(
@@ -361,6 +367,7 @@ CONCEPTS: dict[str, Concept] = {
             "animated card", "gift-wrap", "live-video shopping",
             "live video shopping", "gamified", "blind discount",
             "blind flash",
+            "spin to win", "spin-to-win", "wheel of fortune",
         ),
     ),
 

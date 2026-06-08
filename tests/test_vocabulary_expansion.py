@@ -72,5 +72,30 @@ class ViabilityConceptTests(unittest.TestCase):
         self.assertIn("zero_party_data", fired(text, "defensibility"))
 
 
+class ExistingConceptAdditionTests(unittest.TestCase):
+    def test_new_cost_save_triggers(self) -> None:
+        self.assertIn("measurable_cost_save", fired("issues a returnless refund to deflect returns", "roi_visibility"))
+
+    def test_new_revenue_lift_triggers(self) -> None:
+        self.assertIn("measurable_revenue_lift", fired("a reactivation sequence for lapsed buyers", "roi_visibility"))
+
+    def test_clone_signal_negative(self) -> None:
+        labels = fired("a drop-in replacement, an alternative to gorgias at a fraction of the price", "differentiation")
+        self.assertIn("-incumbent_clone_signal", labels)
+        self.assertLess(adjustment("alternative to gorgias at a fraction of the price", "differentiation"), 0)
+
+    def test_voice_build_negative(self) -> None:
+        self.assertIn("-hard_realtime_ai_build", fired("voice commerce with conversational checkout", "buildability"))
+
+    def test_autonomous_negative(self) -> None:
+        self.assertIn("-autonomous_irreversible", fired("an autonomous buying agent that auto-issues refunds", "operational_simplicity"))
+
+    def test_platform_gated_negative(self) -> None:
+        self.assertIn("-platform_gated_build", fired("built on the agentic checkout protocol", "platform_access"))
+
+    def test_novelty_negative(self) -> None:
+        self.assertIn("-novelty_consumer_behavior", fired("a spin to win wheel of fortune popup", "roi_visibility"))
+
+
 if __name__ == "__main__":
     unittest.main()
