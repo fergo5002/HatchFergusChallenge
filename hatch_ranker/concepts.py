@@ -616,6 +616,66 @@ SATURATED_CATEGORIES: dict[str, dict[str, object]] = {
         "label": "occasion marketing",
         "incumbents": "Klaviyo segments, Birdsend",
     },
+    "post_purchase_upsell": {
+        "triggers": ("post-purchase upsell", "thank-you page upsell", "order bump", "one-click upsell", "reconvert"),
+        "density": 0.88,
+        "label": "post-purchase upsell",
+        "incumbents": "ReConvert, AfterSell, Zipify OCU, Rebuy, Honeycomb",
+    },
+    "page_builder": {
+        "triggers": ("page builder", "landing page builder", "drag-and-drop page", "pagefly", "gempages"),
+        "density": 0.90,
+        "label": "page builder",
+        "incumbents": "PageFly, GemPages, Shogun, Replo, EComposer",
+    },
+    "returns_portal": {
+        "triggers": ("returns portal", "returns management", "self-service returns", "rma portal", "return label"),
+        "density": 0.85,
+        "label": "returns portal",
+        "incumbents": "Loop Returns, AfterShip Returns, Happy Returns, ReturnGO",
+    },
+    "order_tracking_page": {
+        "triggers": ("order tracking page", "branded tracking", "shipment tracking page", "parcel tracking", "order lookup page"),
+        "density": 0.88,
+        "label": "order tracking page",
+        "incumbents": "AfterShip, ParcelPanel, Tracktor, 17TRACK",
+    },
+    "ai_chatbot_support": {
+        "triggers": ("ai chatbot", "ai support agent", "conversational ai", "support chatbot", "ai concierge"),
+        "density": 0.88,
+        "label": "AI chatbot / support agent",
+        "incumbents": "Tidio Lyro, Gorgias AI, Intercom Fin, Re:amaze",
+    },
+    "shipping_protection": {
+        "triggers": ("shipping protection", "package protection", "shipping insurance", "order protection"),
+        "density": 0.82,
+        "label": "shipping / package protection",
+        "incumbents": "Route, Navidium, ShipInsure, Seel, Guide",
+    },
+    "popup_email_capture": {
+        "triggers": ("email capture popup", "exit-intent popup", "exit intent popup", "newsletter popup", "spin to win"),
+        "density": 0.85,
+        "label": "popup / email capture",
+        "incumbents": "Privy, OptiMonk, Justuno, Klaviyo Forms",
+    },
+    "seo_optimizer": {
+        "triggers": ("seo app", "seo optimizer", "meta tag optimizer", "auto meta tags", "seo audit"),
+        "density": 0.85,
+        "label": "SEO optimizer",
+        "incumbents": "Yoast SEO, Plug In SEO, Booster SEO, SearchPie, TinyIMG",
+    },
+    "server_side_tracking": {
+        "triggers": ("server-side tracking", "server side tracking", "conversions api", "server-side pixel", "first-party pixel"),
+        "density": 0.82,
+        "label": "server-side tracking / CAPI",
+        "incumbents": "Elevar, Trackify, DataCops (now matched by free Meta CAPI / Google Tag Gateway / Shopify native)",
+    },
+    "product_reco_engine": {
+        "triggers": ("frequently bought together", "product recommendation engine", "cross-sell app", "upsell app", "related products app"),
+        "density": 0.85,
+        "label": "product recommendation engine",
+        "incumbents": "Rebuy, LimeSpot, Frequently Bought Together, Wiser",
+    },
 }
 
 

@@ -97,5 +97,36 @@ class ExistingConceptAdditionTests(unittest.TestCase):
         self.assertIn("-novelty_consumer_behavior", fired("a spin to win wheel of fortune popup", "roi_visibility"))
 
 
+class SaturatedCategoryTests(unittest.TestCase):
+    EXPECTED = {
+        "post-purchase upsell on the thank-you page": "post_purchase_upsell",
+        "a drag-and-drop page builder": "page_builder",
+        "a self-service returns portal with rma": "returns_portal",
+        "a branded order tracking page": "order_tracking_page",
+        "an ai chatbot support agent": "ai_chatbot_support",
+        "shipping protection at checkout": "shipping_protection",
+        "an exit-intent email capture popup": "popup_email_capture",
+        "an seo optimizer with auto meta tags": "seo_optimizer",
+        "server-side tracking via conversions api": "server_side_tracking",
+        "a frequently bought together cross-sell app": "product_reco_engine",
+    }
+
+    def test_each_new_category_detected(self) -> None:
+        for text, name in self.EXPECTED.items():
+            hit = detect_saturation(text)
+            self.assertIsNotNone(hit, f"no saturation hit for: {text}")
+            self.assertEqual(hit.name, name, f"wrong category for: {text}")
+
+    def test_saturated_category_adds_trap_and_cap(self) -> None:
+        thesis = Thesis(
+            ref="SAT-1", title="Page Builder Pro",
+            one_liner="a drag-and-drop page builder",
+            example_customer="US DTC brands, $500k-$5m",
+            wedge="a drag-and-drop page builder for landing pages",
+        )
+        card = Ranker().rank([thesis])[0]
+        self.assertTrue(any(t.name == "saturated category" for t in card.traps))
+
+
 if __name__ == "__main__":
     unittest.main()
