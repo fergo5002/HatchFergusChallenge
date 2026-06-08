@@ -148,5 +148,45 @@ class RawKeywordTests(unittest.TestCase):
         self.assertLess(neg, 50)
 
 
+EXCLUDED_BARE_TOKENS = {"ai", "ai-powered", "boost aov", "seo", "capi", "chatbot", "duty"}
+
+
+class GuardTests(unittest.TestCase):
+    def test_no_duplicate_trigger_within_a_concept(self) -> None:
+        for name, concept in CONCEPTS.items():
+            self.assertEqual(
+                len(concept.triggers), len(set(concept.triggers)),
+                f"duplicate trigger inside concept {name}",
+            )
+
+    def test_excluded_bare_tokens_are_not_standalone_triggers(self) -> None:
+        all_triggers = {t for c in CONCEPTS.values() for t in c.triggers}
+        for data in SATURATED_CATEGORIES.values():
+            all_triggers.update(data["triggers"])
+        for token in EXCLUDED_BARE_TOKENS:
+            self.assertNotIn(token, all_triggers, f"excluded bare token present: {token}")
+
+    def test_concept_adjustment_is_bounded(self) -> None:
+        text = (
+            "contribution margin blended mer cac payback landed cost "
+            "returnless refund serial returner order bump store credit"
+        )
+        self.assertLessEqual(adjustment(text, "roi_visibility"), 25.0)
+        self.assertGreaterEqual(adjustment(text, "buildability"), -15.0)
+
+    def test_no_duplicate_trigger_within_a_saturated_category(self) -> None:
+        for name, data in SATURATED_CATEGORIES.items():
+            triggers = tuple(data["triggers"])
+            self.assertEqual(
+                len(triggers), len(set(triggers)),
+                f"duplicate trigger inside saturated category {name}",
+            )
+
+    def test_every_wired_concept_name_exists(self) -> None:
+        for criterion, cfg in CRITERION_CONCEPTS.items():
+            for name in (*cfg.get("positive", ()), *cfg.get("negative", ())):
+                self.assertIn(name, CONCEPTS, f"{criterion} wires unknown concept {name}")
+
+
 if __name__ == "__main__":
     unittest.main()
