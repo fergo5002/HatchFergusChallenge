@@ -127,7 +127,7 @@ Triggers:
 ### 4.8 `zero_party_data` -> data_access, differentiation, defensibility
 Triggers:
 `"zero-party data"`, `"zero party data"`, `"declared preferences"`, `"post-purchase survey"`,
-`"consent mode"`, `"quiz responses"`
+`"consent mode v2"`, `"quiz responses"`
 - Sign GOOD. Score 7-8.
 - Evidence: post-cookie first-party/zero-party data is a durable, merchant-owned moat; post-purchase "how did you hear about us" surveys are now standard attribution. Sources: Triple Whale PPS docs 2025; Analyzify first-party data 2025.
 

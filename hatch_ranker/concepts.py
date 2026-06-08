@@ -363,6 +363,31 @@ CONCEPTS: dict[str, Concept] = {
             "blind flash",
         ),
     ),
+
+    # ----- Viability / company-side positive concepts -----
+    "inventory_forecast_signal": Concept(
+        "inventory_forecast_signal",
+        (
+            "sell-through rate", "reorder point", "days of supply",
+            "safety stock", "stockout prediction", "demand forecast",
+            "demand planning", "dead stock", "overstock",
+        ),
+    ),
+    "agentic_ready_data": Concept(
+        "agentic_ready_data",
+        (
+            "agentic-ready", "agentic ready", "product data completeness",
+            "answer engine optimization", "generative engine optimization",
+            "feed optimization", "ai shopping agent", "agentic storefront",
+        ),
+    ),
+    "zero_party_data": Concept(
+        "zero_party_data",
+        (
+            "zero-party data", "zero party data", "declared preferences",
+            "post-purchase survey", "consent mode v2", "quiz responses",
+        ),
+    ),
 }
 
 
@@ -405,11 +430,11 @@ CRITERION_CONCEPTS: dict[str, dict[str, tuple[str, ...]]] = {
         "negative": ("hard_realtime_ai_build", "platform_gated_build"),
     },
     "platform_access": {
-        "positive": ("standard_shopify_build", "merchant_owns_data"),
+        "positive": ("standard_shopify_build", "merchant_owns_data", "agentic_ready_data"),
         "negative": ("platform_gated_build", "third_party_integration_dep"),
     },
     "data_access": {
-        "positive": ("merchant_owns_data",),
+        "positive": ("merchant_owns_data", "inventory_forecast_signal", "agentic_ready_data", "zero_party_data"),
         "negative": ("thin_data_required",),
     },
     "operational_simplicity": {
@@ -419,18 +444,18 @@ CRITERION_CONCEPTS: dict[str, dict[str, tuple[str, ...]]] = {
     "expansion_surface": {
         "positive": (
             "recurring_pain_event", "adjacent_workflow_surface",
-            "post_purchase_revenue",
+            "post_purchase_revenue", "inventory_forecast_signal",
         ),
         "negative": ("novelty_consumer_behavior",),
     },
     "differentiation": {
-        "positive": ("unique_first_party_data",),
+        "positive": ("unique_first_party_data", "zero_party_data"),
         "negative": ("incumbent_clone_signal",),
     },
     "defensibility": {
         "positive": (
             "unique_first_party_data", "recurring_pain_event",
-            "returns_abuse_pain",
+            "returns_abuse_pain", "zero_party_data",
         ),
         "negative": ("incumbent_clone_signal",),
     },

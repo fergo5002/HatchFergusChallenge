@@ -54,5 +54,23 @@ class CashVelocityConceptTests(unittest.TestCase):
         self.assertIn("eu_regulatory_pain", fired(text, "buyer_pain"))
 
 
+class ViabilityConceptTests(unittest.TestCase):
+    def test_inventory_forecast_fires_on_data_access_and_expansion(self) -> None:
+        text = "predicts sell-through rate and reorder point with days of supply"
+        self.assertIn("inventory_forecast_signal", fired(text, "data_access"))
+        self.assertIn("inventory_forecast_signal", fired(text, "expansion_surface"))
+
+    def test_agentic_ready_fires_on_platform_and_data_access(self) -> None:
+        text = "improves product data completeness for agentic-ready answer engine optimization"
+        self.assertIn("agentic_ready_data", fired(text, "platform_access"))
+        self.assertIn("agentic_ready_data", fired(text, "data_access"))
+
+    def test_zero_party_fires_on_data_diff_defensibility(self) -> None:
+        text = "collects zero-party data via declared preferences and a post-purchase survey"
+        self.assertIn("zero_party_data", fired(text, "data_access"))
+        self.assertIn("zero_party_data", fired(text, "differentiation"))
+        self.assertIn("zero_party_data", fired(text, "defensibility"))
+
+
 if __name__ == "__main__":
     unittest.main()
