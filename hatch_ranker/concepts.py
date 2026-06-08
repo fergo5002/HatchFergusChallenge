@@ -283,7 +283,7 @@ CONCEPTS: dict[str, Concept] = {
             "automatically re-prices", "automatically reprices",
             "auto-replies", "fully autonomous", "price mutation",
             "automatic refund", "automatic message", "speaks for the",
-            "autonomous buying agent", "auto-issues refunds", "agentic checkout",
+            "autonomous buying agent", "auto-issues refunds",
         ),
     ),
 
@@ -357,7 +357,7 @@ CONCEPTS: dict[str, Concept] = {
             "flat monthly", "flat €", "flat eur", "killing", "lite",
             "lite version", "gorgiaslite", "cheaper than", "alternative to",
             "$29/mo vs", "$79/mo", "no per-",
-            "drop-in replacement", "fraction of the price", "fraction of the cost", "undercut",
+            "drop-in replacement", "fraction of the price", "fraction of the cost",
         ),
     ),
     "novelty_consumer_behavior": Concept(

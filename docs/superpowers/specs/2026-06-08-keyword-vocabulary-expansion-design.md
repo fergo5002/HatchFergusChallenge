@@ -139,8 +139,8 @@ Triggers:
 |---|---|---|---|
 | `measurable_cost_save` | `"returnless refund"`, `"deflect returns"`, `"lower return rate"` | + | 8 |
 | `measurable_revenue_lift` | `"reactivation"`, `"reactivation sequence"` | + | 7 |
-| `incumbent_clone_signal` | `"alternative to"`, `"drop-in replacement"`, `"fraction of the price"`, `"fraction of the cost"`, `"undercut"` | - | 8 |
-| `autonomous_irreversible` | `"autonomous buying agent"`, `"auto-issues refunds"`, `"agentic checkout"`, `"fully autonomous"` | - | 8 |
+| `incumbent_clone_signal` | `"drop-in replacement"`, `"fraction of the price"`, `"fraction of the cost"` | - | 8 |
+| `autonomous_irreversible` | `"autonomous buying agent"`, `"auto-issues refunds"` | - | 8 |
 | `hard_realtime_ai_build` | `"voice commerce"`, `"conversational checkout"`, `"real-time voice"` | - | 7 |
 | `platform_gated_build` | `"agentic checkout protocol"`, `"universal commerce protocol"`, `"checkout kit"` | - | 7 |
 | `novelty_consumer_behavior` | `"spin to win"`, `"spin-to-win"`, `"wheel of fortune"` | - | 7 |
