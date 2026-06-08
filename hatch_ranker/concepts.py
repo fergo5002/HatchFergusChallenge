@@ -117,6 +117,50 @@ CONCEPTS: dict[str, Concept] = {
         ),
     ),
 
+    # ----- Cash-velocity-side positive concepts -----
+    "profit_analytics_pain": Concept(
+        "profit_analytics_pain",
+        (
+            "contribution margin", "net margin", "blended mer",
+            "marketing efficiency ratio", "cac payback", "payback period",
+            "landed cost", "per-sku profitability", "sku-level profit",
+            "cogs sync", "blended cac", "true profitability",
+        ),
+    ),
+    "returns_abuse_pain": Concept(
+        "returns_abuse_pain",
+        (
+            "return fraud", "return abuse", "serial returner", "wardrobing",
+            "bracketing", "returnless refund", "empty box", "refund fraud",
+            "return policy abuse", "return rate scoring",
+        ),
+    ),
+    "post_purchase_revenue": Concept(
+        "post_purchase_revenue",
+        (
+            "post-purchase upsell", "post purchase upsell", "order bump",
+            "thank-you page", "thank you page", "post-purchase survey",
+            "store credit", "subscription pause", "skip delivery",
+            "win-back sequence", "reactivation sequence",
+        ),
+    ),
+    "cross_border_duty_pain": Concept(
+        "cross_border_duty_pain",
+        (
+            "landed cost", "de minimis", "import duties", "customs duty",
+            "duty drawback", "tariff", "hts code", "ioss", "import tax",
+            "cross-border duty",
+        ),
+    ),
+    "regulatory_2025_pain": Concept(
+        "regulatory_2025_pain",
+        (
+            "gpsr", "responsible person", "european accessibility act",
+            "eaa compliance", "wcag 2.1", "accessibility audit",
+            "consent mode", "consent management platform",
+        ),
+    ),
+
     # ----- ROI visibility concepts -----
     "measurable_revenue_lift": Concept(
         "measurable_revenue_lift",
@@ -332,11 +376,17 @@ CRITERION_CONCEPTS: dict[str, dict[str, tuple[str, ...]]] = {
             "compliance_filing_pain", "margin_profit_pain",
             "catalog_quality_pain", "wholesale_b2b_pain",
             "supplier_ops_pain",
+            "profit_analytics_pain", "returns_abuse_pain",
+            "cross_border_duty_pain", "regulatory_2025_pain",
         ),
         "negative": ("novelty_consumer_behavior", "aesthetic_no_metric"),
     },
     "roi_visibility": {
-        "positive": ("measurable_revenue_lift", "measurable_cost_save"),
+        "positive": (
+            "measurable_revenue_lift", "measurable_cost_save",
+            "profit_analytics_pain", "post_purchase_revenue",
+            "cross_border_duty_pain",
+        ),
         "negative": ("aesthetic_no_metric", "novelty_consumer_behavior"),
     },
     "buyer_clarity": {
@@ -368,7 +418,10 @@ CRITERION_CONCEPTS: dict[str, dict[str, tuple[str, ...]]] = {
         "negative": ("autonomous_irreversible",),
     },
     "expansion_surface": {
-        "positive": ("recurring_pain_event", "adjacent_workflow_surface"),
+        "positive": (
+            "recurring_pain_event", "adjacent_workflow_surface",
+            "post_purchase_revenue",
+        ),
         "negative": ("novelty_consumer_behavior",),
     },
     "differentiation": {
@@ -376,7 +429,10 @@ CRITERION_CONCEPTS: dict[str, dict[str, tuple[str, ...]]] = {
         "negative": ("incumbent_clone_signal",),
     },
     "defensibility": {
-        "positive": ("unique_first_party_data", "recurring_pain_event"),
+        "positive": (
+            "unique_first_party_data", "recurring_pain_event",
+            "returns_abuse_pain",
+        ),
         "negative": ("incumbent_clone_signal",),
     },
 }
