@@ -49,9 +49,9 @@ class CashVelocityConceptTests(unittest.TestCase):
         self.assertIn("cross_border_duty_pain", fired(text, "buyer_pain"))
         self.assertIn("cross_border_duty_pain", fired(text, "roi_visibility"))
 
-    def test_regulatory_2025_fires_on_buyer_pain(self) -> None:
+    def test_eu_regulatory_fires_on_buyer_pain(self) -> None:
         text = "handles gpsr responsible person and european accessibility act wcag 2.1 audits"
-        self.assertIn("regulatory_2025_pain", fired(text, "buyer_pain"))
+        self.assertIn("eu_regulatory_pain", fired(text, "buyer_pain"))
 
 
 if __name__ == "__main__":

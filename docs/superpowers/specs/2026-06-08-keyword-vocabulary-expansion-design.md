@@ -71,7 +71,7 @@ Each is a `Concept(name, triggers)` added to `CONCEPTS`, then wired into
 ### 4.1 `profit_analytics_pain` -> buyer_pain, roi_visibility
 Triggers:
 `"contribution margin"`, `"net margin"`, `"blended mer"`, `"marketing efficiency ratio"`,
-`"cac payback"`, `"payback period"`, `"landed cost"`, `"per-sku profitability"`,
+`"cac payback"`, `"per-sku profitability"`,
 `"sku-level profit"`, `"cogs sync"`, `"blended cac"`, `"true profitability"`
 - Sign GOOD. Score 9 (strength 3 x recency 3).
 - Evidence: profitability replaced ROAS as the DTC north-star in 2025-26; median DTC CAC $130-156 (2026); Shopify "Cost per item" excludes freight/duty so true landed cost is a documented gap. Sources: Northbeam "Cost of Growth" 2025; StoreHero DTC profitability guide 2026; Luca ecommerce margins 2026; Saras Analytics 2025.
@@ -101,10 +101,10 @@ Triggers:
 - Sign GOOD. Score 9.
 - Evidence: US de minimis ($800) suspended for China-origin Feb 2025, ended globally Aug 29 2025; EU removing the EUR150 duty exemption from Jul 2026; every parcel now needs HTS + brokerage. Sources: CNBC Aug 2025; Easyship Section 321 guide 2025; Avalara EU 2026 blog Nov 2025.
 
-### 4.5 `regulatory_2025_pain` -> buyer_pain
+### 4.5 `eu_regulatory_pain` -> buyer_pain
 Triggers:
-`"gpsr"`, `"responsible person"`, `"european accessibility act"`, `"eaa compliance"`,
-`"wcag 2.1"`, `"accessibility audit"`, `"consent mode"`, `"consent management platform"`
+`"gpsr"`, `"gpsr responsible person"`, `"european accessibility act"`, `"eaa compliance"`,
+`"wcag 2.1"`, `"accessibility audit"`, `"consent mode v2"`, `"consent management platform"`
 - Sign GOOD. Score 8-9.
 - Evidence: GPSR enforced Dec 13 2024 (non-EU sellers need an EU Responsible Person); EAA enforced Jun 28 2025 (WCAG 2.1 AA for checkout, fines to EUR900k); Google Consent Mode v2 enforcement from Jul 2025. Shopify has no native fix. Sources: Shopify Help Center GPSR; TestParty EAA guide 2025; Pandectes Consent Mode v2 2025.
 - NOTE: these correctly **also** trip the existing `compliance scope` trap

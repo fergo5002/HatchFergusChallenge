@@ -122,9 +122,8 @@ CONCEPTS: dict[str, Concept] = {
         "profit_analytics_pain",
         (
             "contribution margin", "net margin", "blended mer",
-            "marketing efficiency ratio", "cac payback", "payback period",
-            "landed cost", "per-sku profitability", "sku-level profit",
-            "cogs sync", "blended cac", "true profitability",
+            "marketing efficiency ratio", "cac payback", "per-sku profitability",
+            "sku-level profit", "cogs sync", "blended cac", "true profitability",
         ),
     ),
     "returns_abuse_pain": Concept(
@@ -152,12 +151,12 @@ CONCEPTS: dict[str, Concept] = {
             "cross-border duty",
         ),
     ),
-    "regulatory_2025_pain": Concept(
-        "regulatory_2025_pain",
+    "eu_regulatory_pain": Concept(
+        "eu_regulatory_pain",
         (
-            "gpsr", "responsible person", "european accessibility act",
+            "gpsr", "gpsr responsible person", "european accessibility act",
             "eaa compliance", "wcag 2.1", "accessibility audit",
-            "consent mode", "consent management platform",
+            "consent mode v2", "consent management platform",
         ),
     ),
 
@@ -377,7 +376,7 @@ CRITERION_CONCEPTS: dict[str, dict[str, tuple[str, ...]]] = {
             "catalog_quality_pain", "wholesale_b2b_pain",
             "supplier_ops_pain",
             "profit_analytics_pain", "returns_abuse_pain",
-            "cross_border_duty_pain", "regulatory_2025_pain",
+            "cross_border_duty_pain", "eu_regulatory_pain",
         ),
         "negative": ("novelty_consumer_behavior", "aesthetic_no_metric"),
     },
