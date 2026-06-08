@@ -629,7 +629,7 @@ SATURATED_CATEGORIES: dict[str, dict[str, object]] = {
         "incumbents": "PageFly, GemPages, Shogun, Replo, EComposer",
     },
     "returns_portal": {
-        "triggers": ("returns portal", "returns management", "self-service returns", "rma portal", "return label"),
+        "triggers": ("returns portal", "returns management", "self-service returns", "rma portal"),
         "density": 0.85,
         "label": "returns portal",
         "incumbents": "Loop Returns, AfterShip Returns, Happy Returns, ReturnGO",
@@ -647,7 +647,7 @@ SATURATED_CATEGORIES: dict[str, dict[str, object]] = {
         "incumbents": "Tidio Lyro, Gorgias AI, Intercom Fin, Re:amaze",
     },
     "shipping_protection": {
-        "triggers": ("shipping protection", "package protection", "shipping insurance", "order protection"),
+        "triggers": ("shipping protection", "package protection", "shipping insurance"),
         "density": 0.82,
         "label": "shipping / package protection",
         "incumbents": "Route, Navidium, ShipInsure, Seel, Guide",
@@ -671,7 +671,7 @@ SATURATED_CATEGORIES: dict[str, dict[str, object]] = {
         "incumbents": "Elevar, Trackify, DataCops (now matched by free Meta CAPI / Google Tag Gateway / Shopify native)",
     },
     "product_reco_engine": {
-        "triggers": ("frequently bought together", "product recommendation engine", "cross-sell app", "upsell app", "related products app"),
+        "triggers": ("frequently bought together", "product recommendation engine", "cross-sell app", "related products app"),
         "density": 0.85,
         "label": "product recommendation engine",
         "incumbents": "Rebuy, LimeSpot, Frequently Bought Together, Wiser",

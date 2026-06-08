@@ -157,14 +157,14 @@ cart = 0.95; helpdesk/back-in-stock = 0.90).
 |---|---|---|---|
 | `post_purchase_upsell` | 0.88 | `"post-purchase upsell"`, `"thank-you page upsell"`, `"order bump"`, `"one-click upsell"`, `"reconvert"` | ReConvert, AfterSell, Zipify OCU, Rebuy, Honeycomb |
 | `page_builder` | 0.90 | `"page builder"`, `"landing page builder"`, `"drag-and-drop page"`, `"pagefly"`, `"gempages"` | PageFly, GemPages, Shogun, Replo, EComposer |
-| `returns_portal` | 0.85 | `"returns portal"`, `"returns management"`, `"self-service returns"`, `"rma portal"`, `"return label"` | Loop Returns, AfterShip Returns, Happy Returns, ReturnGO |
+| `returns_portal` | 0.85 | `"returns portal"`, `"returns management"`, `"self-service returns"`, `"rma portal"` | Loop Returns, AfterShip Returns, Happy Returns, ReturnGO |
 | `order_tracking_page` | 0.88 | `"order tracking page"`, `"branded tracking"`, `"shipment tracking page"`, `"parcel tracking"`, `"order lookup page"` | AfterShip, ParcelPanel, Tracktor, 17TRACK |
 | `ai_chatbot_support` | 0.88 | `"ai chatbot"`, `"ai support agent"`, `"conversational ai"`, `"support chatbot"`, `"ai concierge"` | Tidio Lyro, Gorgias AI, Intercom Fin, Re:amaze |
-| `shipping_protection` | 0.82 | `"shipping protection"`, `"package protection"`, `"shipping insurance"`, `"order protection"` | Route, Navidium, ShipInsure, Seel, Guide |
+| `shipping_protection` | 0.82 | `"shipping protection"`, `"package protection"`, `"shipping insurance"` | Route, Navidium, ShipInsure, Seel, Guide |
 | `popup_email_capture` | 0.85 | `"email capture popup"`, `"exit-intent popup"`, `"exit intent popup"`, `"newsletter popup"`, `"spin to win"` | Privy, OptiMonk, Justuno, Klaviyo Forms |
 | `seo_optimizer` | 0.85 | `"seo app"`, `"seo optimizer"`, `"meta tag optimizer"`, `"auto meta tags"`, `"seo audit"` | Yoast SEO, Plug In SEO, Booster SEO, SearchPie, TinyIMG |
 | `server_side_tracking` | 0.82 | `"server-side tracking"`, `"server side tracking"`, `"conversions api"`, `"server-side pixel"`, `"first-party pixel"` | Elevar, Trackify, DataCops (now matched by free Meta CAPI / Google Tag Gateway / Shopify native) |
-| `product_reco_engine` | 0.85 | `"frequently bought together"`, `"product recommendation engine"`, `"cross-sell app"`, `"upsell app"`, `"related products app"` | Rebuy, LimeSpot, Frequently Bought Together, Wiser |
+| `product_reco_engine` | 0.85 | `"frequently bought together"`, `"product recommendation engine"`, `"cross-sell app"`, `"related products app"` | Rebuy, LimeSpot, Frequently Bought Together, Wiser |
 
 Evidence (all 2025-26, strength 2-3): Medium "Don't Build These Shopify Apps" 2025; Craftberry App Store stats 2025 (reviews & upsell are the deepest review pools); StoreCensus most-uninstalled 2025; DataCops Meta CAPI free 2026; ShipAid/centousapps shipping-protection 2025; Wisepops/OptiMonk popup roundups 2026; the4 order-tracking & SEO roundups 2025.
 
