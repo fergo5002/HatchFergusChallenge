@@ -283,7 +283,7 @@ CONCEPTS: dict[str, Concept] = {
             "automatically re-prices", "automatically reprices",
             "auto-replies", "fully autonomous", "price mutation",
             "automatic refund", "automatic message", "speaks for the",
-            "autonomous buying agent", "auto-issues refunds", "agentic checkout", "fully autonomous",
+            "autonomous buying agent", "auto-issues refunds", "agentic checkout",
         ),
     ),
 
