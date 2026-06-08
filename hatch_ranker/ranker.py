@@ -275,6 +275,10 @@ def buyer_pain(text: str) -> float:
             "defect",
             "price drift",
             "moq creep",
+            "return fraud",
+            "landed cost",
+            "de minimis",
+            "tariff",
         ),
         cap=5,
     )
@@ -327,6 +331,10 @@ def roi_visibility(text: str) -> float:
             "recall",
             "regulator",
             "proof trail",
+            "contribution margin",
+            "returnless refund",
+            "store credit",
+            "duty drawback",
         ),
         cap=5,
     )
@@ -452,6 +460,8 @@ def buildability(text: str) -> float:
             "checklists",
             "exports",
             "calendar",
+            "reorder point",
+            "post-purchase survey",
         ),
         cap=5,
     )
@@ -478,6 +488,8 @@ def buildability(text: str) -> float:
             "messy inbox",
             "email threads",
             "regulator packet",
+            "voice commerce",
+            "conversational checkout",
         ),
         cap=6,
     )
@@ -698,10 +710,12 @@ def defensibility(text: str) -> float:
             "score suppliers",
             "po history",
             "invoices",
+            "cohort retention",
+            "zero-party data",
         ),
         cap=5,
     )
-    score -= 7 * count_any(text, ("static ads", "ad creatives", "gift-wrap", "animated card", "mystery discount"), cap=4)
+    score -= 7 * count_any(text, ("static ads", "ad creatives", "gift-wrap", "animated card", "mystery discount", "drop-in replacement", "fraction of the price"), cap=4)
     return clamp(score)
 
 

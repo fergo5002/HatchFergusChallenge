@@ -128,5 +128,25 @@ class SaturatedCategoryTests(unittest.TestCase):
         self.assertTrue(any(t.name == "saturated category" for t in card.traps))
 
 
+class RawKeywordTests(unittest.TestCase):
+    def test_buyer_pain_raw_additions(self) -> None:
+        self.assertGreater(buyer_pain("we detect return fraud and compute landed cost on de minimis tariff parcels"), 43)
+
+    def test_roi_raw_additions(self) -> None:
+        self.assertGreater(roi_visibility("reports contribution margin, returnless refund savings, store credit, and duty drawback"), 42)
+
+    def test_buildability_raw_positive_and_negative(self) -> None:
+        pos = buildability("a reorder point tool with a post-purchase survey")
+        neg = buildability("voice commerce with conversational checkout")
+        self.assertGreater(pos, 62)
+        self.assertLess(neg, 62)
+
+    def test_defensibility_raw_positive_and_negative(self) -> None:
+        pos = defensibility("builds a cohort retention model on zero-party data")
+        neg = defensibility("a drop-in replacement, an alternative to the leader")
+        self.assertGreater(pos, 50)
+        self.assertLess(neg, 50)
+
+
 if __name__ == "__main__":
     unittest.main()

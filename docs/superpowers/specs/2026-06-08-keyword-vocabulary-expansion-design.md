@@ -211,7 +211,7 @@ Curated, score >= 6, reinforced beyond the bounded concept layer:
 | `buyer_pain` (+8) | `"return fraud"`, `"landed cost"`, `"de minimis"`, `"tariff"` | (none) |
 | `roi_visibility` (+8) | `"contribution margin"`, `"returnless refund"`, `"store credit"`, `"duty drawback"` | (none) |
 | `buildability` (+6 / -8) | `"reorder point"`, `"post-purchase survey"` | `"voice commerce"`, `"conversational checkout"` |
-| `defensibility` (+8 / -7) | `"cohort retention"`, `"zero-party data"` | `"alternative to"`, `"drop-in replacement"` |
+| `defensibility` (+8 / -7) | `"cohort retention"`, `"zero-party data"` | `"drop-in replacement"`, `"fraction of the price"` |
 
 ## 11. Testing plan
 
