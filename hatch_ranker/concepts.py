@@ -370,7 +370,7 @@ CONCEPTS: dict[str, Concept] = {
         (
             "sell-through rate", "reorder point", "days of supply",
             "safety stock", "stockout prediction", "demand forecast",
-            "demand planning", "dead stock", "overstock",
+            "demand planning", "dead stock", "excess inventory",
         ),
     ),
     "agentic_ready_data": Concept(
@@ -378,7 +378,7 @@ CONCEPTS: dict[str, Concept] = {
         (
             "agentic-ready", "agentic ready", "product data completeness",
             "answer engine optimization", "generative engine optimization",
-            "feed optimization", "ai shopping agent", "agentic storefront",
+            "ai shopping agent", "agentic storefront",
         ),
     ),
     "zero_party_data": Concept(

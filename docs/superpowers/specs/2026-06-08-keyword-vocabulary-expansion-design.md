@@ -113,14 +113,14 @@ Triggers:
 ### 4.6 `inventory_forecast_signal` -> data_access, expansion_surface
 Triggers:
 `"sell-through rate"`, `"reorder point"`, `"days of supply"`, `"safety stock"`,
-`"stockout prediction"`, `"demand forecast"`, `"demand planning"`, `"dead stock"`, `"overstock"`
+`"stockout prediction"`, `"demand forecast"`, `"demand planning"`, `"dead stock"`, `"excess inventory"`
 - Sign GOOD. Score 7-8.
 - Evidence: buildable from owned Shopify orders; AI forecasting cuts stockouts up to 75% and excess inventory 20-40%. Distinct from existing OOS *pain*. Sources: Prediko 2025; ECOSIRE 2025.
 
 ### 4.7 `agentic_ready_data` -> platform_access, data_access
 Triggers:
 `"agentic-ready"`, `"agentic ready"`, `"product data completeness"`, `"answer engine optimization"`,
-`"generative engine optimization"`, `"feed optimization"`, `"ai shopping agent"`, `"agentic storefront"`
+`"generative engine optimization"`, `"ai shopping agent"`, `"agentic storefront"`
 - Sign GOOD. Score 7-8.
 - Evidence: Shopify auto-enrolled millions of stores into AI/agentic storefronts (2026); the *buildable, merchant-owned* half is structured product-data quality / feed optimization (vs. the platform-owned checkout protocols, which are BAD — §7). Sources: Shopify "Agentic-Ready Product Data" 2026; BigCommerce GEO 2026; Amsive AEO 2025.
 
