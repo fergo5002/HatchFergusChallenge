@@ -560,7 +560,7 @@ SATURATED_CATEGORIES: dict[str, dict[str, object]] = {
         ),
         "density": 0.85,
         "label": "subscribe-and-save",
-        "incumbents": "Recharge, Skio, Stay AI, Loop Subscriptions",
+        "incumbents": "Recharge, Skio, Stay AI, Loop, Appstle (plus Shopify native Subscriptions)",
     },
     "helpdesk_tickets": {
         "triggers": (
@@ -569,7 +569,7 @@ SATURATED_CATEGORIES: dict[str, dict[str, object]] = {
         ),
         "density": 0.90,
         "label": "helpdesk / tickets",
-        "incumbents": "Gorgias, Zendesk, Tidio, Re:amaze",
+        "incumbents": "Gorgias (native AI agent), Zendesk, Tidio, Re:amaze",
     },
     "sms_marketing": {
         "triggers": (
@@ -578,7 +578,7 @@ SATURATED_CATEGORIES: dict[str, dict[str, object]] = {
         ),
         "density": 0.85,
         "label": "SMS marketing",
-        "incumbents": "Postscript, Attentive, Klaviyo SMS",
+        "incumbents": "Postscript, Attentive, Klaviyo SMS (Yotpo/SMSBump exited Dec 2025; assets to Attentive)",
     },
     "email_marketing_blast": {
         "triggers": (
