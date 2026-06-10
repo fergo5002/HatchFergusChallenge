@@ -433,13 +433,35 @@ class StuffingDefenseTests(unittest.TestCase):
         ),
     }
 
-    def test_keyword_stuffer_stays_under_residual_ceiling(self) -> None:
-        # GAME-3 is the documented residual attack (see plan Amendments, Task 4c):
-        # it stays under all three breadth budgets and scores via the 3-4 heaviest
-        # criteria. The ceiling below is the measured bound; if a vocabulary change
-        # pushes it higher, the anti-stuffing calibration must be revisited.
-        card = Ranker().score(load_thesis_dict(self.KEYWORD_STUFFED))
-        self.assertLessEqual(card.final_score, 82.0)
+    JOINT_BUDGET_STUFFED = {
+        "ref": "GAME-4",
+        "title": "Failed Payment Recovery",
+        "one_liner": (
+            "A webhook listener reads Shopify orders and the product catalog, "
+            "joins store's collections with historical cohort retention, and "
+            "computes contribution margin and reorder point for each style."
+        ),
+        "example_customer": "US DTC brands, $500K-$5M",
+        "wedge": (
+            "Merchants work from one unified native screen with rules, checklists, "
+            "loyalty data they can migrate in, and exports for their accountant."
+        ),
+    }
+
+    def test_residual_attacks_stay_under_ceiling(self) -> None:
+        # The strongest known under-all-budgets attacks (see plan Amendments, Task
+        # 4c/4d). The ceiling is the measured residual bound; if a vocabulary or
+        # threshold change pushes either fixture above it, recalibrate the breadth
+        # budgets before trusting the ranking.
+        for fixture in (self.KEYWORD_STUFFED, self.JOINT_BUDGET_STUFFED):
+            card = Ranker().score(load_thesis_dict(fixture))
+            self.assertLessEqual(
+                card.final_score, 82.0, f"{fixture['ref']} broke the residual ceiling"
+            )
+
+    def test_joint_budget_attack_gets_rubric_saturation_penalty(self) -> None:
+        card = Ranker().score(load_thesis_dict(self.JOINT_BUDGET_STUFFED))
+        self.assertTrue(any(trap.name == "rubric saturation" for trap in card.traps))
 
     def test_extreme_stuffers_are_trapped_by_rubric_saturation(self) -> None:
         for fixture in (self.STUFFED, self.NON_PAIN_STUFFED):

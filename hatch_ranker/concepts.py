@@ -358,7 +358,7 @@ CONCEPTS: dict[str, Concept] = {
         (
             "1/10th", "1/10 the price", "priced at $19", "$19/mo",
             "$19/month", "flat monthly", "flat €", "flat eur",
-            "lite version", "gorgiaslite", "cheaper than", "alternative to",
+            "lite version", "cheaper than", "alternative to",
             "$29/mo vs", "$79/mo", "no per-",
             "drop-in replacement", "fraction of the price", "fraction of the cost",
         ),
