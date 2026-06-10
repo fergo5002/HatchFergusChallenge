@@ -559,5 +559,44 @@ class OverfitVocabularyTests(unittest.TestCase):
         )
 
 
+class InputRobustnessTests(unittest.TestCase):
+    def test_csv_with_multiline_quoted_field_loads_one_row(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "multiline.csv"
+            path.write_text(
+                'ref,title,one_liner,example_customer,wedge\n'
+                'T-01,Restock Hub,"Line one\nline two","US DTC brands, $500K-$5M",Widget\n',
+                encoding="utf-8",
+            )
+            theses = load_theses(path)
+            self.assertEqual(len(theses), 1)
+            self.assertIn("line two", theses[0].one_liner)
+
+    def test_cli_skips_duplicate_refs_across_append(self) -> None:
+        from hatch_ranker.cli import main
+
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            base = root / "base.json"
+            live = root / "live.json"
+            out = root / "out"
+            row = {
+                "ref": "B-01",
+                "title": "B2B Portal",
+                "one_liner": "B2B pricing in 30 minutes",
+                "example_customer": "US DTC brands, $500K-$5M",
+                "wedge": "CSV import and tiered pricing.",
+            }
+            base.write_text(json.dumps([row]), encoding="utf-8")
+            live.write_text(json.dumps([row]), encoding="utf-8")  # same ref appended
+            exit_code = main(
+                ["--input", str(base), "--append", str(live), "--out-dir", str(out)]
+            )
+            self.assertEqual(exit_code, 0)
+            ranking = json.loads((out / "ranking.json").read_text(encoding="utf-8"))
+            refs = [card["ref"] for card in ranking]
+            self.assertEqual(len(refs), len(set(refs)), "duplicate refs reached output")
+
+
 if __name__ == "__main__":
     unittest.main()

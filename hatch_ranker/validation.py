@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 from dataclasses import dataclass
+from io import StringIO
 from pathlib import Path
 from typing import Any
 
@@ -65,7 +66,7 @@ def load_raw_records(path: str | Path) -> list[Any]:
 
     if source.suffix.lower() == ".csv":
         raw = _read_text(source)
-        return [dict(row) for row in csv.DictReader(raw.splitlines())]
+        return [dict(row) for row in csv.DictReader(StringIO(raw))]
 
     raise ValueError(f"Unsupported input file type: {source.suffix}. Use .csv or .json.")
 

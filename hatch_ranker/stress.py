@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from hatch_ranker.io import write_outputs
+from hatch_ranker.matching import any_phrase
 from hatch_ranker.models import Scorecard, Thesis
 from hatch_ranker.ranker import Ranker, normalize
 from hatch_ranker.validation import (
@@ -575,7 +576,7 @@ def elapsed_since(start: float) -> float:
 
 def _contains_platform_text(card: Scorecard) -> bool:
     text = normalize(card.thesis.text if card.thesis else "")
-    return any(word in text for word in ("checkout", "shopify functions", "pos", "amazon", "walmart", "etsy", "stripe"))
+    return any_phrase(text, ("checkout", "shopify functions", "pos", "amazon", "walmart", "etsy", "stripe"))
 
 
 if __name__ == "__main__":

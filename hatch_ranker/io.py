@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import json
+from io import StringIO
 from pathlib import Path
 from typing import Iterable
 
@@ -69,7 +70,7 @@ def _load_json_records(path: Path) -> list[dict[str, object]]:
 
 def _load_csv_records(path: Path) -> list[dict[str, object]]:
     raw = _read_text(path)
-    rows = csv.DictReader(raw.splitlines())
+    rows = csv.DictReader(StringIO(raw))
     return [dict(row) for row in rows]
 
 

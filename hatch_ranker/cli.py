@@ -51,6 +51,16 @@ def main(argv: list[str] | None = None) -> int:
         theses.extend(new_theses)
         start_index += len(new_theses)
 
+    seen_refs: set[str] = set()
+    unique: list = []
+    for thesis in theses:
+        if thesis.ref in seen_refs:
+            print(f"Skipping duplicate ref {thesis.ref} (source row {thesis.source_index + 1}).")
+            continue
+        seen_refs.add(thesis.ref)
+        unique.append(thesis)
+    theses = unique
+
     cards = Ranker().rank(theses)
     write_outputs(cards, Path(args.out_dir), top_n=args.top)
     print_summary(cards, Path(args.out_dir))
