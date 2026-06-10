@@ -11,8 +11,12 @@ engine shares one defensible definition of "the thesis says X":
 * A hyphen immediately before the match blocks it ("closed-loop" must not
   fire the "loop" brand trigger), but a hyphen after is allowed so
   "ai-powered" still fires "ai".
-* A negator within the three words before the match suppresses it, so
-  "no manual upload needed" stops firing the high-setup trigger.
+* An *absence marker* within the three words before the match suppresses it,
+  so "no manual upload needed" stops firing the high-setup trigger.
+  Only ``{"no", "not", "without", "zero", "never"}`` are absence markers.
+  Mitigation verbs (eliminate, replace, avoid …) are NOT negators here because
+  they signal that the pain *exists* — "eliminates involuntary churn" is
+  evidence of churn pain and must still fire the churn trigger.
 
 Precondition: all inputs must be ``normalize()``d lowercase text and lowercase
 needles. Patterns are case-sensitive by design — callers must lower-case before
@@ -24,19 +28,11 @@ from __future__ import annotations
 import re
 from functools import lru_cache
 
-NEGATORS = frozenset(
-    {
-        "no", "not", "without", "zero", "never",
-        "avoid", "avoids", "avoiding",
-        "eliminate", "eliminates", "eliminating", "eliminated",
-        "replace", "replaces", "replacing",
-    }
-)
+NEGATORS = frozenset({"no", "not", "without", "zero", "never"})
 
 _NEGATION_WINDOW_WORDS = 3
 # 40 chars comfortably covers 3 average English words (~6-8 chars each) plus
-# punctuation and spaces, so the negation look-back window never misses a
-# nearby negator.
+# punctuation and spaces — sufficient for typical 3-word negation windows.
 _WINDOW_CHARS = 40
 
 
@@ -52,6 +48,7 @@ def phrase_in(text: str, needle: str) -> bool:
 
 
 def count_phrases(text: str, needles: tuple[str, ...], *, cap: int) -> int:
+    """Count distinct needles present in text (via ``phrase_in``), capped at ``cap``."""
     count = sum(1 for needle in needles if phrase_in(text, needle))
     return min(count, cap)
 

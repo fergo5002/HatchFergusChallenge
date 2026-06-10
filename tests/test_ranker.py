@@ -287,6 +287,46 @@ class FalsePositiveRegressionTests(unittest.TestCase):
         )
 
 
+    def test_restocking_thesis_still_hits_saturation_trap(self) -> None:
+        thesis = load_thesis_dict(
+            {
+                "ref": "FP-05",
+                "title": "Restocking Alerts",
+                "one_liner": "Restocking alerts for sold-out products",
+                "example_customer": "US DTC brands, $500K-$5M",
+                "wedge": "Watches inventory and emails shoppers when restocking happens.",
+            }
+        )
+        card = Ranker().score(thesis)
+        self.assertTrue(any(trap.name == "saturated category" for trap in card.traps))
+
+    def test_supplier_poses_is_not_an_ops_penalty(self) -> None:
+        thesis = load_thesis_dict(
+            {
+                "ref": "FP-06",
+                "title": "Delay Radar",
+                "one_liner": "Flags when the supplier poses a delay risk",
+                "example_customer": "US DTC brands, $500K-$5M",
+                "wedge": "Reads shipping notices and flags when the supplier poses a delay risk early.",
+            }
+        )
+        baseline = load_thesis_dict(
+            {
+                "ref": "FP-07",
+                "title": "Delay Radar",
+                "one_liner": "Flags supplier delay risk",
+                "example_customer": "US DTC brands, $500K-$5M",
+                "wedge": "Reads shipping notices and flags delay risk early.",
+            }
+        )
+        scored = Ranker().score(thesis)
+        scored_baseline = Ranker().score(baseline)
+        self.assertEqual(
+            scored.criteria["operational_simplicity"],
+            scored_baseline.criteria["operational_simplicity"],
+        )
+
+
 def load_thesis_dict(record):
     with tempfile.TemporaryDirectory() as temp:
         path = Path(temp) / "one.json"

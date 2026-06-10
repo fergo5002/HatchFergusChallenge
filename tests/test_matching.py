@@ -39,6 +39,16 @@ class PhraseInTests(unittest.TestCase):
         )
 
 
+    def test_mitigation_verbs_do_not_suppress(self) -> None:
+        self.assertTrue(phrase_in("eliminates involuntary churn", "involuntary churn"))
+        self.assertTrue(phrase_in("helps merchants avoid failed payments", "failed payments"))
+        self.assertTrue(phrase_in("replaces the helpdesk", "helpdesk"))
+
+    def test_absence_markers_still_suppress(self) -> None:
+        self.assertFalse(phrase_in("no manual upload needed", "manual upload"))
+        self.assertFalse(phrase_in("works without a regulator packet", "regulator packet"))
+
+
 class CountPhrasesTests(unittest.TestCase):
     def test_cap_is_applied(self) -> None:
         self.assertEqual(

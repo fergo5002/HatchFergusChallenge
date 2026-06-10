@@ -41,8 +41,9 @@ CONCEPTS: dict[str, Concept] = {
     "refund_return_pain": Concept(
         "refund_return_pain",
         (
-            "refund", "return", "exchange", "chargeback", "claim back",
-            "money back", "send back", "ship back", "restock fee",
+            "refund", "refunded", "refunding", "return", "exchange",
+            "chargeback", "claim back", "money back", "send back",
+            "ship back", "restock fee",
         ),
     ),
     "churn_cancel_pain": Concept(
@@ -65,8 +66,8 @@ CONCEPTS: dict[str, Concept] = {
         "inventory_oos_pain",
         (
             "out of stock", "oos", "back in stock", "back-in-stock",
-            "stockout", "low stock", "restock", "preorder", "pre-order",
-            "waitlist", "wishlist", "demand inbox",
+            "stockout", "low stock", "restock", "restocking", "preorder",
+            "pre-order", "waitlist", "wishlist", "demand inbox",
         ),
     ),
     "failed_payment_pain": Concept(
@@ -107,7 +108,7 @@ CONCEPTS: dict[str, Concept] = {
         (
             "wholesale", "b2b", "stockist", "stockists", "retailer",
             "retailers", "faire", "moq", "tiered pricing", "net 30",
-            "net-30", "po", "purchase order",
+            "net-30", "purchase order",
         ),
     ),
     "supplier_ops_pain": Concept(
@@ -166,10 +167,10 @@ CONCEPTS: dict[str, Concept] = {
     "measurable_revenue_lift": Concept(
         "measurable_revenue_lift",
         (
-            "recover", "recovered", "lift", "uplift", "increase",
-            "boost conversion", "convert", "conversion rate", "aov", "ltv",
-            "repeat purchase", "reorder rate",
-            "reactivation", "reactivation sequence",
+            "recover", "recovered", "recovery", "lift", "uplift",
+            "increase", "increased", "boost conversion", "convert",
+            "conversion rate", "aov", "ltv", "repeat purchase",
+            "reorder rate", "reactivation", "reactivation sequence",
         ),
     ),
     "measurable_cost_save": Concept(
@@ -222,10 +223,10 @@ CONCEPTS: dict[str, Concept] = {
     "hard_realtime_ai_build": Concept(
         "hard_realtime_ai_build",
         (
-            "real-time", "realtime", "live video", "live-video", "live stream",
-            "voice clone", "voice-clone", "voice questions", "voice answer",
-            "3d mesh", "ar try-on", "ar try on", "diffusion",
-            "generative 3d", "size recommendation",
+            "real-time", "near-real-time", "realtime", "live video",
+            "live-video", "live stream", "voice clone", "voice-clone",
+            "voice questions", "voice answer", "3d mesh", "ar try-on",
+            "ar try on", "diffusion", "generative 3d", "size recommendation",
             "voice commerce", "conversational checkout", "real-time voice",
         ),
     ),
@@ -356,7 +357,7 @@ CONCEPTS: dict[str, Concept] = {
         "incumbent_clone_signal",
         (
             "1/10th", "1/10 the price", "priced at $19", "$19/mo",
-            "flat monthly", "flat €", "flat eur",
+            "$19/month", "flat monthly", "flat €", "flat eur",
             "lite version", "gorgiaslite", "cheaper than", "alternative to",
             "$29/mo vs", "$79/mo", "no per-",
             "drop-in replacement", "fraction of the price", "fraction of the cost",
@@ -521,8 +522,8 @@ def _concept_fires(text: str, concept: Concept) -> bool:
 SATURATED_CATEGORIES: dict[str, dict[str, object]] = {
     "back_in_stock_unified_demand": {
         "triggers": (
-            "back-in-stock", "back in stock", "restock", "notify me",
-            "waitlist", "wishlist", "demand inbox",
+            "back-in-stock", "back in stock", "restock", "restocking",
+            "notify me", "waitlist", "wishlist", "demand inbox",
         ),
         "density": 0.90,
         "label": "back-in-stock / wishlist / preorder",

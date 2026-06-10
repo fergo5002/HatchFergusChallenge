@@ -284,7 +284,7 @@ def buyer_pain(text: str) -> float:
         ),
         cap=5,
     )
-    score += 4 * count_any(text, ("aov", "bundle", "upsell", "reorder", "loyalty", "referral"), cap=3)
+    score += 4 * count_any(text, ("aov", "bundle", "upsell", "upselling", "reorder", "reordering", "loyalty", "referral"), cap=3)
     score -= 6 * count_any(text, ("mystery", "guess", "screenshot", "share card", "animated card"), cap=2)
     return clamp(score)
 
@@ -296,6 +296,7 @@ def roi_visibility(text: str) -> float:
         (
             "recover",
             "recovered",
+            "recovery",
             "revenue",
             "margin",
             "commission",
@@ -314,6 +315,7 @@ def roi_visibility(text: str) -> float:
             "conversion",
             "return",
             "reorder",
+            "reordering",
             "support",
             "ticket",
             "tickets",
@@ -355,7 +357,7 @@ def buyer_clarity(thesis: Thesis, revenue: RevenueRange | None) -> float:
         score += 5
     if contains_any(text, ("sub-$", "sub $", "$1k-50k")):
         score -= 8
-    if contains_any(text, ("$10m", "10m+")):
+    if contains_any(text, ("$10m", "10m+", "€10m", "£10m")):
         score -= 6
     if contains_any(text, ("reptile", "lingerie")):
         score -= 5
@@ -475,6 +477,7 @@ def buildability(text: str) -> float:
             "ar try-on",
             "realtime api",
             "real-time",
+            "near-real-time",
             "live-video",
             "voice questions",
             "voice-clone",
@@ -579,7 +582,6 @@ def operational_simplicity(text: str) -> float:
             "liquidation",
             "resale",
             "supplier po",
-            "supplier pos",
             "cash",
             "commission",
             "payouts",
@@ -674,6 +676,7 @@ def differentiation(text: str) -> float:
             "1/10th",
             "priced at",
             "$19/mo",
+            "$19/month",
             "flat monthly",
             "flat eur",
             "flat €",
@@ -828,7 +831,7 @@ def identify_traps(
                 "The product asks merchants or shoppers to adopt a new behavior before ROI is obvious.",
             )
         )
-    if contains_any(text, ("1/10th", "$19/mo", "flat monthly", "killing octane", "gorgiaslite")):
+    if contains_any(text, ("1/10th", "$19/mo", "$19/month", "flat monthly", "killing octane", "gorgiaslite")):
         traps.append(
             Trap(
                 "cheap clone",
@@ -967,11 +970,11 @@ def make_evidence(thesis: Thesis, card: Scorecard, revenue: RevenueRange | None)
 def infer_tags(text: str, customer_text: str) -> list[str]:
     tags: list[str] = []
     checks = (
-        ("conversion", ("cart", "checkout", "aov", "bundle", "quiz", "pdp", "social proof")),
+        ("conversion", ("cart", "add-to-cart", "in-cart", "checkout", "aov", "bundle", "quiz", "quizzes", "pdp", "social proof")),
         ("retention", ("subscription", "reorder", "replenishment", "loyalty", "churn", "cancel", "cancellation")),
         ("returns", ("return", "refund", "exchange", "resale")),
         ("support", ("helpdesk", "where is my order", "wismo", "ticket")),
-        ("inventory", ("inventory", "supplier", "stock", "back-in-stock", "preorder", "pre-order")),
+        ("inventory", ("inventory", "supplier", "stock", "restocking", "back-in-stock", "preorder", "pre-order")),
         ("b2b", ("wholesale", "b2b", "stockists", "faire")),
         ("marketing", ("email", "sms", "ad creative", "meta", "tiktok", "occasion")),
         ("ai", ("ai", "gpt", "llm", "embedding", "diffusion", "vision")),
