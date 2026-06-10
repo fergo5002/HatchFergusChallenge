@@ -474,15 +474,8 @@ CRITERION_CONCEPTS: dict[str, dict[str, tuple[str, ...]]] = {
 
 # Pain domains a v1 wedge can credibly attack. Firing many of these at once
 # is the signature of an unfocused thesis or keyword-stuffed text.
-PAIN_CONCEPT_NAMES: frozenset[str] = frozenset(
-    {
-        "refund_return_pain", "churn_cancel_pain", "support_volume_pain",
-        "inventory_oos_pain", "failed_payment_pain", "compliance_filing_pain",
-        "margin_profit_pain", "catalog_quality_pain", "wholesale_b2b_pain",
-        "supplier_ops_pain", "profit_analytics_pain", "returns_abuse_pain",
-        "cross_border_duty_pain", "eu_regulatory_pain",
-    }
-)
+# Derived from CRITERION_CONCEPTS["buyer_pain"]["positive"] to guarantee sync.
+PAIN_CONCEPT_NAMES: frozenset[str] = frozenset(CRITERION_CONCEPTS["buyer_pain"]["positive"])
 
 
 def fired_pain_concepts(text: str) -> list[str]:

@@ -918,6 +918,14 @@ git commit -m "feat: optional shared-token gate on /api/ai-scan"
 
 ---
 
+## Amendments (2026-06-10, post-review)
+
+- **Task 2:** NEGATORS reduced to absence markers only (no/not/without/zero/never); mitigation verbs (avoid/eliminate/replace families) removed — "eliminates churn" is evidence of churn pain, not its absence. Restored word forms lost by the plural-only heuristic (recovery, restocking, near-real-time, $19/month, etc.).
+- **Task 3:** MONEY_PATTERN also accepts spelled-out "million" via `(?:illion)?`; bare "under " (no symbol) removed from the floor-zeroing needles.
+- **Task 4 (4b):** Added a second breadth trap, "stuffed vocabulary" (>= 10 distinct fired positive concepts -> overflow-scaled penalty + cap 72), because pain-domain counting alone left a 3-domain stuffer scoring 97.6. Unfocused-wedge cap softened: penalty-only at 4-5 pain domains, cap 72 at >= 6; reason reworded to neutral plain English with human-readable domain labels.
+
+---
+
 ## Explicitly out of scope (documented decisions, not gaps)
 
 - **Double-counting of evidence** (one phrase can hit a keyword list, a concept, a trap, and a cap): intentional layering — keyword = magnitude, concept = robustness, trap/cap = severity. Defend it as designed redundancy; do not dampen without corpus evidence it misranks.

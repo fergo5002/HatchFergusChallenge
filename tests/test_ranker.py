@@ -363,6 +363,25 @@ class StuffingDefenseTests(unittest.TestCase):
         ),
     }
 
+    NON_PAIN_STUFFED = {
+        "ref": "GAME-2",
+        "title": "Merchant Margin Copilot",
+        "one_liner": (
+            "Recovers revenue from failed payments with contribution margin, cac payback, "
+            "and per-sku profitability lift for true profitability"
+        ),
+        "example_customer": "US apparel and beauty mid-market DTC brands on Shopify, $500K-$5M",
+        "wedge": (
+            "One-click native shopify theme app extension widget with csv import, webhook "
+            "and metafield rules reads shopify orders and the product catalog; approval "
+            "queue with human in the loop drafts fixes; nightly per-customer dashboard from "
+            "the merchant's own data and zero-party data post-purchase survey; demand "
+            "forecast and reorder point safety stock; agentic-ready product data "
+            "completeness; post-purchase upsell store credit recovery; "
+            "category-normalized first-party signals in one dashboard command center."
+        ),
+    }
+
     def test_stuffed_thesis_gets_unfocused_wedge_trap(self) -> None:
         card = Ranker().score(load_thesis_dict(self.STUFFED))
         self.assertTrue(any(trap.name == "unfocused wedge" for trap in card.traps))
@@ -373,7 +392,7 @@ class StuffingDefenseTests(unittest.TestCase):
         )
         self.assertEqual(cards[0].ref, "REAL-1")
 
-    def test_two_pain_domains_do_not_trigger_the_trap(self) -> None:
+    def test_three_pain_domains_do_not_trigger_the_trap(self) -> None:
         card = Ranker().score(
             load_thesis_dict(
                 {
@@ -389,6 +408,36 @@ class StuffingDefenseTests(unittest.TestCase):
             )
         )
         self.assertFalse(any(trap.name == "unfocused wedge" for trap in card.traps))
+
+
+    def test_non_pain_stuffer_gets_stuffed_vocabulary_trap(self) -> None:
+        card = Ranker().score(load_thesis_dict(self.NON_PAIN_STUFFED))
+        self.assertTrue(any(trap.name == "stuffed vocabulary" for trap in card.traps))
+
+    def test_non_pain_stuffer_ranks_below_focused_thesis(self) -> None:
+        cards = Ranker().rank(
+            [load_thesis_dict(self.FOCUSED), load_thesis_dict(self.NON_PAIN_STUFFED)]
+        )
+        self.assertEqual(cards[0].ref, "REAL-1")
+
+    def test_legit_broad_compliance_wedge_is_not_called_stuffed(self) -> None:
+        recall_ledger = load_thesis_dict(
+            {
+                "ref": "LEGIT-1",
+                "title": "Recall Ledger",
+                "one_liner": "Recall readiness for regulated consumables brands",
+                "example_customer": "Supplements and pet food brands, $500K-$10M",
+                "wedge": (
+                    "Builds regulator packets, affected customer lists, lot-level proof "
+                    "trails, refund workflows, and retailer notices from batch IDs, "
+                    "supplier COAs, complaints, and orders."
+                ),
+            }
+        )
+        card = Ranker().score(recall_ledger)
+        self.assertFalse(any(trap.name == "stuffed vocabulary" for trap in card.traps))
+        for trap in card.traps:
+            self.assertNotIn("stuffed", trap.reason)
 
 
 class MoneyParserTests(unittest.TestCase):

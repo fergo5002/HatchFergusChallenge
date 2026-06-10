@@ -98,15 +98,41 @@ class Ranker:
 
         pain_domains = fired_pain_concepts(text)
         if len(pain_domains) >= 4:
+            # 4-5 domains = penalty-only scope warning; >= 6 = cap applied below,
+            # since no coherent single wedge spans six pain domains.
             overflow = len(pain_domains) - 3
+            labels = [name.removesuffix("_pain").replace("_", " ") for name in pain_domains]
             traps.append(
                 Trap(
                     "unfocused wedge",
                     round(min(4.0 * overflow, 16.0), 1),
                     (
-                        f"The thesis claims {len(pain_domains)} distinct pain domains "
-                        f"({', '.join(pain_domains)}); a 10-week v1 can credibly attack "
-                        "one or two, so this reads as unfocused scope or stuffed text."
+                        f"The thesis spans {len(pain_domains)} pain areas "
+                        f"({', '.join(labels)}); a 10-week v1 has to win one wedge "
+                        "first, so breadth this wide is a scope risk."
+                    ),
+                )
+            )
+
+        # Measured on the project's own fixtures: the most verbose legitimate thesis
+        # fires 8 distinct positive concepts; adversarial stuffers fire 18+; threshold
+        # 10 leaves a 2-concept margin.
+        distinct_positives = {
+            name
+            for names in fired_concepts.values()
+            for name in names
+            if not name.startswith("-")
+        }
+        if len(distinct_positives) >= 10:
+            overflow = len(distinct_positives) - 9
+            traps.append(
+                Trap(
+                    "stuffed vocabulary",
+                    round(min(4.0 * overflow, 16.0), 1),
+                    (
+                        f"The text fires {len(distinct_positives)} distinct positive signals "
+                        "across the rubric; the most credible focused theses fire fewer than "
+                        "ten, so this reads as keyword stuffing rather than one buildable wedge."
                     ),
                 )
             )
@@ -117,6 +143,10 @@ class Ranker:
             traps.append(_saturated_category_trap(saturation_hit, criteria))
 
         viability_cap = compute_viability_cap(criteria, traps)
+        # 4-5 pain domains = penalty only; >= 6 also caps because no coherent
+        # single wedge spans six pain domains.
+        if len(pain_domains) >= 6:
+            viability_cap = min(viability_cap, 72)
         if saturation_hit is not None:
             viability_cap = _apply_saturation_cap(viability_cap, saturation_hit)
 
@@ -891,7 +921,7 @@ def compute_viability_cap(criteria: dict[str, float], traps: list[Trap]) -> floa
         cap = min(cap, 68)
     if "thin data" in trap_names:
         cap = min(cap, 70)
-    if "unfocused wedge" in trap_names:
+    if "stuffed vocabulary" in trap_names:
         cap = min(cap, 72)
     if "compliance scope" in trap_names:
         cap = min(cap, 78)
