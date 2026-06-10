@@ -423,10 +423,10 @@ def market_access(customer_text: str, revenue: RevenueRange | None) -> float:
             score = 48
         elif high and high <= 1_000_000 and low <= 100_000:
             score = 64
-        elif high and high <= 5_000_000 and low >= 100_000:
-            score = 78
         elif high and high <= 5_000_000 and low >= 500_000:
             score = 82
+        elif high and high <= 5_000_000 and low >= 100_000:
+            score = 78
         elif high and high >= 10_000_000:
             score = 64
         elif not high and low >= 500_000:
@@ -990,11 +990,14 @@ def infer_tags(text: str, customer_text: str) -> list[str]:
     return tags
 
 
+MONEY_PATTERN = re.compile(r"[$€£]\s*(\d+(?:,\d{3})*(?:\.\d+)?)\s*([km])\b")
+
+
 def parse_revenue_range(text: str) -> RevenueRange | None:
     normalized = normalize(text)
     amounts = [
-        money_to_number(match.group(1), match.group(2))
-        for match in re.finditer(r"(?:[$€]\s*)?(\d+(?:\.\d+)?)\s*([km])", normalized)
+        money_to_number(match.group(1).replace(",", ""), match.group(2))
+        for match in MONEY_PATTERN.finditer(normalized)
     ]
     if not amounts:
         return None

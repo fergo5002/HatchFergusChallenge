@@ -334,5 +334,32 @@ def load_thesis_dict(record):
         return load_theses(path)[0]
 
 
+class MoneyParserTests(unittest.TestCase):
+    def test_durations_and_distances_are_not_revenue(self) -> None:
+        self.assertIsNone(parse_revenue_range("ships in 3 months"))
+        self.assertIsNone(parse_revenue_range("set up in 5 minutes"))
+        self.assertIsNone(parse_revenue_range("within 10 km radius"))
+
+    def test_comma_amounts_parse_fully(self) -> None:
+        revenue = parse_revenue_range("Operators doing $1,500K-$2.75M")
+        self.assertIsNotNone(revenue)
+        self.assertEqual(revenue.low, 1_500_000)
+        self.assertEqual(revenue.high, 2_750_000)
+
+    def test_pound_symbol_is_supported(self) -> None:
+        revenue = parse_revenue_range("UK brands doing £500K-£5M")
+        self.assertIsNotNone(revenue)
+        self.assertEqual(revenue.low, 500_000)
+
+
+class MarketAccessBandTests(unittest.TestCase):
+    def test_mid_market_premium_band_is_reachable(self) -> None:
+        from hatch_ranker.ranker import market_access, RevenueRange
+
+        premium = market_access("US DTC brands", RevenueRange(500_000, 5_000_000))
+        standard = market_access("US DTC brands", RevenueRange(100_000, 5_000_000))
+        self.assertGreater(premium, standard)
+
+
 if __name__ == "__main__":
     unittest.main()
