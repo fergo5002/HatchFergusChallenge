@@ -308,7 +308,6 @@ def buyer_pain(text: str) -> float:
             "stockists",
             "faire",
             "rising-price",
-            "15% commission",
             "cancel",
             "cancellation",
             "churn",
@@ -328,7 +327,6 @@ def buyer_pain(text: str) -> float:
             "nexus",
             "filing",
             "accountant-ready",
-            "profit truth",
             "losing money",
             "cogs",
             "marketplace fees",
@@ -423,8 +421,6 @@ def buyer_clarity(thesis: Thesis, revenue: RevenueRange | None) -> float:
         score -= 8
     if contains_any(text, ("$10m", "10m+", "€10m", "£10m")):
         score -= 6
-    if contains_any(text, ("reptile", "lingerie")):
-        score -= 5
     return clamp(score)
 
 
@@ -439,12 +435,9 @@ def low_setup_friction(text: str) -> float:
             "theme app extension",
             "widget",
             "csv",
-            "zero curation",
-            "no customer portal",
             "plug into",
             "drag-and-drop",
             "native shopify",
-            "morning fix list",
             "checklists",
             "calendar",
             "exports",
@@ -497,8 +490,6 @@ def market_access(customer_text: str, revenue: RevenueRange | None) -> float:
             score = 66
     if contains_any(customer_text, ("dtc brands", "shopify", "marketplace", "sellers", "retailers")):
         score += 5
-    if contains_any(customer_text, ("reptile", "lingerie")):
-        score -= 9
     if contains_any(customer_text, ("sub-$500k", "sub $500k", "sub-$1m", "sub $1m")):
         score -= 6
     return clamp(score)
@@ -671,7 +662,6 @@ def expansion_surface(text: str) -> float:
     score += 9 * count_any(
         text,
         (
-            "demand inbox",
             "back-in-stock",
             "preorder",
             "wishlist",
@@ -689,7 +679,6 @@ def expansion_surface(text: str) -> float:
             "catalog health",
             "stockists",
             "loyalty",
-            "profit truth",
             "sku p&l",
             "marketplace",
             "sales-tax",
@@ -698,7 +687,6 @@ def expansion_surface(text: str) -> float:
             "recall",
             "compliance",
             "supplier reliability",
-            "negotiation briefs",
             "damage-rate",
         ),
         cap=5,
@@ -715,22 +703,12 @@ def differentiation(text: str) -> float:
         (
             "unified",
             "one dashboard",
-            "demand inbox",
-            "zero javascript",
-            "zero external javascript",
-            "actual",
             "approval",
             "approve",
             "migrate",
             "native",
             "rules",
-            "queue-and-drip",
-            "product is locked",
-            "no customer portal",
-            "profit truth",
             "proof trail",
-            "negotiation briefs",
-            "without becoming a full tax filing platform",
         ),
         cap=5,
     )
@@ -744,8 +722,6 @@ def differentiation(text: str) -> float:
             "flat monthly",
             "flat eur",
             "flat €",
-            "killing octane",
-            "gorgiaslite",
             "lite",
             "cheaper",
         ),
@@ -761,7 +737,6 @@ def defensibility(text: str) -> float:
         (
             "per-customer",
             "per-sku",
-            "demand inbox",
             "merchant's own data",
             "category-normalized",
             "dashboard",
@@ -771,7 +746,6 @@ def defensibility(text: str) -> float:
             "customer profile",
             "stockists",
             "supplier",
-            "catalog every night",
             "batch ids",
             "lot-level",
             "proof trail",
@@ -895,7 +869,7 @@ def identify_traps(
                 "The product asks merchants or shoppers to adopt a new behavior before ROI is obvious.",
             )
         )
-    if contains_any(text, ("1/10th", "$19/mo", "$19/month", "flat monthly", "killing octane", "gorgiaslite")):
+    if contains_any(text, ("1/10th", "$19/mo", "$19/month", "flat monthly", "fraction of the price", "drop-in replacement", "cheaper than")):
         traps.append(
             Trap(
                 "cheap clone",

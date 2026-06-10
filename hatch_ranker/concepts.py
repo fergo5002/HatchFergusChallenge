@@ -67,7 +67,7 @@ CONCEPTS: dict[str, Concept] = {
         (
             "out of stock", "oos", "back in stock", "back-in-stock",
             "stockout", "low stock", "restock", "restocking", "preorder",
-            "pre-order", "waitlist", "wishlist", "demand inbox",
+            "pre-order", "waitlist", "wishlist",
         ),
     ),
     "failed_payment_pain": Concept(
@@ -339,7 +339,7 @@ CONCEPTS: dict[str, Concept] = {
         "adjacent_workflow_surface",
         (
             "dashboard", "command center", "workflow", "rules engine",
-            "queue", "demand inbox", "inbox", "calendar", "scorecard",
+            "queue", "inbox", "calendar", "scorecard",
             "audit log", "profile", "fix list", "drafts",
         ),
     ),

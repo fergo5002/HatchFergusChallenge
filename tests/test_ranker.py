@@ -517,5 +517,25 @@ class MarketAccessBandTests(unittest.TestCase):
         self.assertGreater(premium, standard)
 
 
+class OverfitVocabularyTests(unittest.TestCase):
+    def test_vertical_nouns_do_not_change_buyer_clarity(self) -> None:
+        base = {
+            "ref": "V-1",
+            "title": "Restock Alerts",
+            "one_liner": "Back-in-stock alerts",
+            "example_customer": "US DTC brands, $500K-$5M",
+            "wedge": "A PDP widget sends restock alerts.",
+        }
+        niche = dict(base, ref="V-2", example_customer="US lingerie DTC brands, $500K-$5M")
+        plain = Ranker().score(load_thesis_dict(base))
+        scored_niche = Ranker().score(load_thesis_dict(niche))
+        self.assertEqual(
+            plain.criteria["buyer_clarity"], scored_niche.criteria["buyer_clarity"]
+        )
+        self.assertEqual(
+            plain.criteria["market_access"], scored_niche.criteria["market_access"]
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
