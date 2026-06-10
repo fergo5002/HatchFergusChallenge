@@ -232,6 +232,61 @@ class RankerTests(unittest.TestCase):
         self.assertFalse(any(trap.name == "marketplace platform" for trap in card.traps))
 
 
+class FalsePositiveRegressionTests(unittest.TestCase):
+    def test_innocent_words_do_not_trigger_compliance_trap(self) -> None:
+        thesis = load_thesis_dict(
+            {
+                "ref": "FP-01",
+                "title": "Private Label Insights",
+                "one_liner": "An innovative dashboard to elevate private label brands",
+                "example_customer": "US DTC brands, $500K-$5M",
+                "wedge": "Built by a serial entrepreneur; shows each product detail page conversion.",
+            }
+        )
+        card = Ranker().score(thesis)
+        self.assertFalse(any(trap.name == "compliance scope" for trap in card.traps))
+        self.assertNotIn("compliance", card.tags)
+
+    def test_email_alone_does_not_get_ai_tag(self) -> None:
+        thesis = load_thesis_dict(
+            {
+                "ref": "FP-02",
+                "title": "Email Digest",
+                "one_liner": "A weekly email digest of store changes",
+                "example_customer": "US DTC brands, $500K-$5M",
+                "wedge": "Sends a templated email summary of catalog changes every Monday.",
+            }
+        )
+        card = Ranker().score(thesis)
+        self.assertNotIn("ai", card.tags)
+
+    def test_negated_setup_burden_is_not_penalized(self) -> None:
+        with_negation = load_thesis_dict(
+            {
+                "ref": "FP-03",
+                "title": "Hands-Off Sync",
+                "one_liner": "Catalog sync with no manual upload needed",
+                "example_customer": "US DTC brands, $500K-$5M",
+                "wedge": "Reads the product catalog directly; no manual upload, no merchant uploads.",
+            }
+        )
+        without_mention = load_thesis_dict(
+            {
+                "ref": "FP-04",
+                "title": "Hands-Off Sync",
+                "one_liner": "Catalog sync that just works",
+                "example_customer": "US DTC brands, $500K-$5M",
+                "wedge": "Reads the product catalog directly.",
+            }
+        )
+        scored_neg = Ranker().score(with_negation)
+        scored_plain = Ranker().score(without_mention)
+        self.assertGreaterEqual(
+            scored_neg.criteria["low_setup_friction"],
+            scored_plain.criteria["low_setup_friction"],
+        )
+
+
 def load_thesis_dict(record):
     with tempfile.TemporaryDirectory() as temp:
         path = Path(temp) / "one.json"

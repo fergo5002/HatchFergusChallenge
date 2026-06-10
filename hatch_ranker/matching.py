@@ -13,6 +13,10 @@ engine shares one defensible definition of "the thesis says X":
   "ai-powered" still fires "ai".
 * A negator within the three words before the match suppresses it, so
   "no manual upload needed" stops firing the high-setup trigger.
+
+Precondition: all inputs must be ``normalize()``d lowercase text and lowercase
+needles. Patterns are case-sensitive by design — callers must lower-case before
+passing in.
 """
 
 from __future__ import annotations
@@ -24,11 +28,15 @@ NEGATORS = frozenset(
     {
         "no", "not", "without", "zero", "never",
         "avoid", "avoids", "avoiding",
-        "eliminate", "eliminates", "replaces",
+        "eliminate", "eliminates", "eliminating", "eliminated",
+        "replace", "replaces", "replacing",
     }
 )
 
 _NEGATION_WINDOW_WORDS = 3
+# 40 chars comfortably covers 3 average English words (~6-8 chars each) plus
+# punctuation and spaces, so the negation look-back window never misses a
+# nearby negator.
 _WINDOW_CHARS = 40
 
 
@@ -55,7 +63,7 @@ def any_phrase(text: str, needles: tuple[str, ...]) -> bool:
 @lru_cache(maxsize=8192)
 def _compiled(needle: str) -> re.Pattern[str]:
     escaped = re.escape(needle)
-    left = r"(?<![\w$€-])" if needle[0].isalnum() else ""
+    left = r"(?<![\w$€£-])" if needle[0].isalnum() else ""
     if needle[-1].isalpha():
         right = r"(?:e?s)?(?!\w)"
     elif needle[-1].isdigit():

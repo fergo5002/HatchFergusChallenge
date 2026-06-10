@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from hatch_ranker.matching import phrase_in
+from hatch_ranker.matching import count_phrases, phrase_in
 
 
 class PhraseInTests(unittest.TestCase):
@@ -36,6 +36,14 @@ class PhraseInTests(unittest.TestCase):
         # Negator more than 3 words back does not suppress the match.
         self.assertTrue(
             phrase_in("not only that, it also drafts the regulator packet", "regulator packet")
+        )
+
+
+class CountPhrasesTests(unittest.TestCase):
+    def test_cap_is_applied(self) -> None:
+        self.assertEqual(
+            count_phrases("returns refunds exchanges", ("return", "refund", "exchange"), cap=2),
+            2,
         )
 
 

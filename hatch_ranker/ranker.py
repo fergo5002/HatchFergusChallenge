@@ -11,6 +11,7 @@ from hatch_ranker.concepts import (
     concept_adjustment,
     detect_saturation,
 )
+from hatch_ranker.matching import any_phrase, count_phrases
 from hatch_ranker.models import Scorecard, Thesis, Trap
 
 
@@ -245,6 +246,7 @@ def buyer_pain(text: str) -> float:
             "rising-price",
             "15% commission",
             "cancel",
+            "cancellation",
             "churn",
             "subscription",
             "helpdesk",
@@ -924,7 +926,7 @@ def smallest_sellable_v1(card: Scorecard) -> str:
         return "A failed-payment webhook listener that sends a three-step email/SMS recovery sequence and reports dollars recovered."
     if contains_any(text, ("return", "refund", "exchange", "resale")):
         return "A return-intake rules screen that recommends exchange, credit, or resale routing and shows estimated margin impact before any automation."
-    if contains_any(text, ("inventory", "supplier", "po")):
+    if contains_any(text, ("inventory", "supplier", "purchase order", "po history", "reorder point")):
         return "A stock-level watcher that drafts supplier PO emails from reorder rules and requires merchant approval before sending."
     if contains_any(text, ("ad creative", "meta", "tiktok", "creative")):
         return "An approval-first creative generator that exports static ad variants from product photos before attempting direct ad-account launch."
@@ -966,7 +968,7 @@ def infer_tags(text: str, customer_text: str) -> list[str]:
     tags: list[str] = []
     checks = (
         ("conversion", ("cart", "checkout", "aov", "bundle", "quiz", "pdp", "social proof")),
-        ("retention", ("subscription", "reorder", "replenishment", "loyalty", "churn", "cancel")),
+        ("retention", ("subscription", "reorder", "replenishment", "loyalty", "churn", "cancel", "cancellation")),
         ("returns", ("return", "refund", "exchange", "resale")),
         ("support", ("helpdesk", "where is my order", "wismo", "ticket")),
         ("inventory", ("inventory", "supplier", "stock", "back-in-stock", "preorder", "pre-order")),
@@ -1095,12 +1097,11 @@ def money_to_number(amount: str, suffix: str) -> float:
 
 
 def contains_any(text: str, needles: tuple[str, ...]) -> bool:
-    return any(needle in text for needle in needles)
+    return any_phrase(text, needles)
 
 
 def count_any(text: str, needles: tuple[str, ...], *, cap: int) -> int:
-    count = sum(1 for needle in needles if needle in text)
-    return min(count, cap)
+    return count_phrases(text, needles, cap=cap)
 
 
 def weighted_average(values: tuple[tuple[float, float], ...]) -> float:

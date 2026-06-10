@@ -27,6 +27,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from hatch_ranker.matching import phrase_in
+
 
 @dataclass(frozen=True)
 class Concept:
@@ -55,7 +57,7 @@ CONCEPTS: dict[str, Concept] = {
         "support_volume_pain",
         (
             "support tickets", "helpdesk", "wismo", "where is my order",
-            "customer service", "email volume", "inbox", "dm",
+            "customer service", "email volume", "inbox", "dms", "direct message",
             "complaint", "complaints", "ticket", "tickets",
         ),
     ),
@@ -354,7 +356,7 @@ CONCEPTS: dict[str, Concept] = {
         "incumbent_clone_signal",
         (
             "1/10th", "1/10 the price", "priced at $19", "$19/mo",
-            "flat monthly", "flat €", "flat eur", "killing", "lite",
+            "flat monthly", "flat €", "flat eur",
             "lite version", "gorgiaslite", "cheaper than", "alternative to",
             "$29/mo vs", "$79/mo", "no per-",
             "drop-in replacement", "fraction of the price", "fraction of the cost",
@@ -505,7 +507,7 @@ def concept_adjustment(text: str, criterion: str) -> tuple[float, list[str]]:
 
 
 def _concept_fires(text: str, concept: Concept) -> bool:
-    return any(trigger in text for trigger in concept.triggers)
+    return any(phrase_in(text, trigger) for trigger in concept.triggers)
 
 
 # ---------------------------------------------------------------------------
@@ -694,7 +696,7 @@ def detect_saturation(text: str) -> SaturationHit | None:
     best: SaturationHit | None = None
     for name, data in SATURATED_CATEGORIES.items():
         triggers = data["triggers"]
-        if any(trigger in text for trigger in triggers):  # type: ignore[union-attr]
+        if any(phrase_in(text, trigger) for trigger in triggers):  # type: ignore[union-attr]
             hit = SaturationHit(
                 name=name,
                 density=float(data["density"]),  # type: ignore[arg-type]
