@@ -10,6 +10,7 @@ from hatch_ranker.concepts import (
     SaturationHit,
     concept_adjustment,
     detect_saturation,
+    fired_pain_concepts,
 )
 from hatch_ranker.matching import any_phrase, count_phrases
 from hatch_ranker.models import Scorecard, Thesis, Trap
@@ -94,6 +95,21 @@ class Ranker:
         )
 
         traps = identify_traps(text, customer_text, revenue, criteria)
+
+        pain_domains = fired_pain_concepts(text)
+        if len(pain_domains) >= 4:
+            overflow = len(pain_domains) - 3
+            traps.append(
+                Trap(
+                    "unfocused wedge",
+                    round(min(4.0 * overflow, 16.0), 1),
+                    (
+                        f"The thesis claims {len(pain_domains)} distinct pain domains "
+                        f"({', '.join(pain_domains)}); a 10-week v1 can credibly attack "
+                        "one or two, so this reads as unfocused scope or stuffed text."
+                    ),
+                )
+            )
 
         # Step 3: saturated-category trap + cap (improvement B)
         saturation_hit = detect_saturation(text)
@@ -875,6 +891,8 @@ def compute_viability_cap(criteria: dict[str, float], traps: list[Trap]) -> floa
         cap = min(cap, 68)
     if "thin data" in trap_names:
         cap = min(cap, 70)
+    if "unfocused wedge" in trap_names:
+        cap = min(cap, 72)
     if "compliance scope" in trap_names:
         cap = min(cap, 78)
     if "platform breadth" in trap_names:

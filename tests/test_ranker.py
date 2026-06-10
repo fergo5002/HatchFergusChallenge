@@ -334,6 +334,63 @@ def load_thesis_dict(record):
         return load_theses(path)[0]
 
 
+class StuffingDefenseTests(unittest.TestCase):
+    STUFFED = {
+        "ref": "GAME-1",
+        "title": "Merchant Profit Recovery Dashboard",
+        "one_liner": (
+            "Recovers revenue and margin from failed payments, returns, dunning, "
+            "churn and refund leakage with visible ROI"
+        ),
+        "example_customer": "US apparel and beauty DTC brands on Shopify, $500K-$5M",
+        "wedge": (
+            "One-click native Shopify theme app extension widget with CSV import reads "
+            "shopify orders and product catalog via webhook and metafield rules; approval "
+            "queue drafts fixes the merchant approves; nightly per-sku per-customer "
+            "dashboard from the merchant's own data shows recovered revenue, expected "
+            "savings, contribution margin, aov, reorder and conversion lift, with "
+            "a profit truth scorecard, morning fix list and one-click bulk fixes."
+        ),
+    }
+    FOCUSED = {
+        "ref": "REAL-1",
+        "title": "Failed Payment Recovery",
+        "one_liner": "Recovers failed subscription payments for Shopify brands",
+        "example_customer": "US DTC subscription brands, $500K-$5M",
+        "wedge": (
+            "A failed-payment webhook listener sends a three-step recovery email "
+            "sequence and reports dollars recovered each week."
+        ),
+    }
+
+    def test_stuffed_thesis_gets_unfocused_wedge_trap(self) -> None:
+        card = Ranker().score(load_thesis_dict(self.STUFFED))
+        self.assertTrue(any(trap.name == "unfocused wedge" for trap in card.traps))
+
+    def test_stuffed_thesis_ranks_below_focused_thesis(self) -> None:
+        cards = Ranker().rank(
+            [load_thesis_dict(self.FOCUSED), load_thesis_dict(self.STUFFED)]
+        )
+        self.assertEqual(cards[0].ref, "REAL-1")
+
+    def test_two_pain_domains_do_not_trigger_the_trap(self) -> None:
+        card = Ranker().score(
+            load_thesis_dict(
+                {
+                    "ref": "OK-1",
+                    "title": "Margin Truth",
+                    "one_liner": "SKU-level profit control for marketplace sellers",
+                    "example_customer": "Amazon and Etsy sellers doing $250K-$5M GMV",
+                    "wedge": (
+                        "Pulls fees, ads, returns, storage, shipping, refunds, and COGS "
+                        "into a SKU P&L, then drafts kill, raise, or reprice actions."
+                    ),
+                }
+            )
+        )
+        self.assertFalse(any(trap.name == "unfocused wedge" for trap in card.traps))
+
+
 class MoneyParserTests(unittest.TestCase):
     def test_durations_and_distances_are_not_revenue(self) -> None:
         self.assertIsNone(parse_revenue_range("ships in 3 months"))
