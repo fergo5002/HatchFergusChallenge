@@ -15,6 +15,13 @@ from hatch_ranker.concepts import (
 from hatch_ranker.matching import any_phrase, count_phrases
 from hatch_ranker.models import Scorecard, Thesis, Trap
 
+# Calibration (2026-06-10): across 8 DOMAIN_TEMPLATES + 50-thesis real corpus + REAL-1
+# fixture, the highest legitimate criteria-at-85+ count is 4 (two real-corpus theses).
+# The orphan-keyword attack (GAME-3) scores 5 at this threshold — below the principled
+# floor of max(4+2, 7)=7, so that specific attack is a residual (see docs/superpowers/
+# plans/2026-06-10-ranker-hardening.md §4c for the documented ceiling).
+RUBRIC_SATURATION_THRESHOLD = 7
+
 
 @dataclass(frozen=True)
 class RevenueRange:
@@ -116,7 +123,7 @@ class Ranker:
 
         # Measured on the project's own fixtures: the most verbose legitimate thesis
         # fires 8 distinct positive concepts; adversarial stuffers fire 18+; threshold
-        # 10 leaves a 2-concept margin.
+        # 10 leaves a 1-concept margin (9 is safe, 10 trips).
         distinct_positives = {
             name
             for names in fired_concepts.values()
@@ -137,16 +144,27 @@ class Ranker:
                 )
             )
 
+        high_criteria = sorted(name for name, value in criteria.items() if value >= 85)
+        if len(high_criteria) >= RUBRIC_SATURATION_THRESHOLD:
+            overflow = len(high_criteria) - (RUBRIC_SATURATION_THRESHOLD - 1)
+            traps.append(
+                Trap(
+                    "rubric saturation",
+                    round(min(4.0 * overflow, 16.0), 1),
+                    (
+                        f"{len(high_criteria)} of 12 criteria score 85+ simultaneously; "
+                        "real wedges have weak spots, so across-the-board excellence reads "
+                        "as text optimized for the rubric rather than a buildable plan."
+                    ),
+                )
+            )
+
         # Step 3: saturated-category trap + cap (improvement B)
         saturation_hit = detect_saturation(text)
         if saturation_hit is not None:
             traps.append(_saturated_category_trap(saturation_hit, criteria))
 
-        viability_cap = compute_viability_cap(criteria, traps)
-        # 4-5 pain domains = penalty only; >= 6 also caps because no coherent
-        # single wedge spans six pain domains.
-        if len(pain_domains) >= 6:
-            viability_cap = min(viability_cap, 72)
+        viability_cap = compute_viability_cap(criteria, traps, pain_domain_count=len(pain_domains))
         if saturation_hit is not None:
             viability_cap = _apply_saturation_cap(viability_cap, saturation_hit)
 
@@ -904,7 +922,9 @@ def identify_traps(
     return traps
 
 
-def compute_viability_cap(criteria: dict[str, float], traps: list[Trap]) -> float:
+def compute_viability_cap(
+    criteria: dict[str, float], traps: list[Trap], *, pain_domain_count: int = 0
+) -> float:
     weak_link = min(
         criteria["buildability"],
         criteria["platform_access"],
@@ -922,6 +942,12 @@ def compute_viability_cap(criteria: dict[str, float], traps: list[Trap]) -> floa
     if "thin data" in trap_names:
         cap = min(cap, 70)
     if "stuffed vocabulary" in trap_names:
+        cap = min(cap, 72)
+    # 4-5 pain domains = penalty only; >= 6 also caps because no coherent
+    # single wedge spans six pain domains.
+    if pain_domain_count >= 6:
+        cap = min(cap, 72)
+    if "rubric saturation" in trap_names:
         cap = min(cap, 72)
     if "compliance scope" in trap_names:
         cap = min(cap, 78)

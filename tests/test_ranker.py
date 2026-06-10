@@ -420,6 +420,40 @@ class StuffingDefenseTests(unittest.TestCase):
         )
         self.assertEqual(cards[0].ref, "REAL-1")
 
+    KEYWORD_STUFFED = {
+        "ref": "GAME-3",
+        "title": "Ops Copilot",
+        "one_liner": "Operations dashboard for Shopify brands",
+        "example_customer": "US DTC brands, $500K-$5M",
+        "wedge": (
+            "Pulls the Shopify Orders API and the product catalog, tracks inventory "
+            "state and profit truth, and applies rules to generate checklists, exports, "
+            "and negotiation briefs for the buyer. It also handles subscription pause "
+            "and upsell offers. Zero curation and no customer portal to maintain."
+        ),
+    }
+
+    def test_keyword_stuffer_gets_rubric_saturation_trap(self) -> None:
+        card = Ranker().score(load_thesis_dict(self.KEYWORD_STUFFED))
+        self.assertTrue(any(trap.name == "rubric saturation" for trap in card.traps))
+
+    def test_keyword_stuffer_does_not_reach_the_top(self) -> None:
+        cards = Ranker().rank(
+            [load_thesis_dict(self.FOCUSED), load_thesis_dict(self.KEYWORD_STUFFED)]
+        )
+        self.assertEqual(cards[0].ref, "REAL-1")
+
+    def test_no_legitimate_template_gets_rubric_saturation(self) -> None:
+        from hatch_ranker.stress import DOMAIN_TEMPLATES
+
+        for index, template in enumerate(DOMAIN_TEMPLATES):
+            record = dict(template, ref=f"TPL-{index}")
+            card = Ranker().score(load_thesis_dict(record))
+            self.assertFalse(
+                any(trap.name == "rubric saturation" for trap in card.traps),
+                f"{template['title']} wrongly flagged as rubric saturation",
+            )
+
     def test_legit_broad_compliance_wedge_is_not_called_stuffed(self) -> None:
         recall_ledger = load_thesis_dict(
             {
