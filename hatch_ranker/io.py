@@ -164,7 +164,7 @@ def _write_markdown(cards: list[Scorecard], path: Path, *, top_n: int) -> None:
         "- Company potential: expansion surface, differentiation, repeatability, and defensibility.",
         "- Trap handling: severe technical, platform, trust, data, novelty, clone, and saturated-category risks cap or penalize the final score.",
         "- Concept-anchor blend: each keyword criterion is adjusted within [-15, +25] based on which broader concepts fire, so synonym drift in new theses does not collapse a score to baseline.",
-        "- Tier: Top Tier / Strong / Watch / Trap, calibrated against the actual corpus percentile.",
+        "- Tier: Top Tier / Strong / Watch / Lagging / Trap, calibrated against the actual corpus percentile (Trap requires an actual trap).",
         "",
         "## Tier Summary",
         "",
