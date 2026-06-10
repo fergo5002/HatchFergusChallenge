@@ -24,6 +24,7 @@ const TIER_ORDER = [
   ["Top Tier", "top"],
   ["Strong", "strong"],
   ["Watch", "watch"],
+  ["Lagging", "watch"],
   ["Trap", "trap"],
 ];
 

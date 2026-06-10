@@ -221,5 +221,29 @@ class TierAnnotationTests(unittest.TestCase):
         self.assertEqual(cards[1].tier, "Trap")
 
 
+class TierHonestyTests(unittest.TestCase):
+    def test_bottom_percentile_without_traps_is_lagging_not_trap(self) -> None:
+        theses = []
+        for index in range(10):
+            theses.append(
+                _load_thesis(
+                    {
+                        "ref": f"T-{index:02d}",
+                        "title": f"Catalog Helper {index}",
+                        "one_liner": "Catalog fix list for Shopify stores" + " plus" * index,
+                        "example_customer": "US DTC brands, $500K-$5M",
+                        "wedge": "Nightly catalog audit emails a ranked fix list."
+                        + " It also exports a csv." * (index % 3),
+                    }
+                )
+            )
+        cards = Ranker().rank(theses)
+        for card in cards:
+            if card.tier == "Trap":
+                self.assertTrue(
+                    card.traps, f"{card.ref} labelled Trap with zero traps"
+                )
+
+
 if __name__ == "__main__":
     unittest.main()

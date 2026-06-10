@@ -104,5 +104,39 @@ class WebApiTests(unittest.TestCase):
         self.assertEqual(body["error"], "missing API key")
 
 
+class AiScanTokenTests(unittest.TestCase):
+    def test_scan_rejected_without_token_when_token_configured(self) -> None:
+        import os
+        from hatch_ranker.web import ai_scan_payload
+
+        os.environ["AI_SCAN_TOKEN"] = "secret"
+        try:
+            status, body = ai_scan_payload({"ranking": [{"ref": "H-01"}]}, token="")
+            self.assertEqual(status, 401)
+            self.assertFalse(body["ok"])
+        finally:
+            del os.environ["AI_SCAN_TOKEN"]
+
+    def test_scan_accepted_with_matching_token_reaches_normal_flow(self) -> None:
+        import os
+        from hatch_ranker.web import ai_scan_payload
+
+        os.environ["AI_SCAN_TOKEN"] = "secret"
+        saved_groq = os.environ.pop("GROQ_API_KEY", None)
+        os.environ["GROQ_API_KEY"] = ""
+        try:
+            status, body = ai_scan_payload(
+                {"ranking": [{"ref": "H-01"}]}, token="secret"
+            )
+            # Without GROQ_API_KEY this proceeds past the gate and fails at the
+            # Groq layer (502), proving the token check passed.
+            self.assertNotEqual(status, 401)
+        finally:
+            del os.environ["AI_SCAN_TOKEN"]
+            del os.environ["GROQ_API_KEY"]
+            if saved_groq is not None:
+                os.environ["GROQ_API_KEY"] = saved_groq
+
+
 if __name__ == "__main__":
     unittest.main()

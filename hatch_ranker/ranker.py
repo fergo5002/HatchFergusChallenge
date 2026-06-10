@@ -10,8 +10,21 @@ from hatch_ranker.concepts import (
     SaturationHit,
     concept_adjustment,
     detect_saturation,
+    fired_pain_concepts,
 )
+from hatch_ranker.matching import any_phrase, count_phrases
 from hatch_ranker.models import Scorecard, Thesis, Trap
+
+# Calibration (2026-06-10): real-corpus max high-criteria count = 4
+# (histogram {0:15,1:13,2:17,3:3,4:2}), stress templates max = 3, REAL-1
+# fixture = 1; the 5-6 band is penalty-only so a borderline-rosy real thesis
+# loses at most 8 points, never capped; the joint-budget attack (87.2 pre-fix)
+# lands ~79.
+RUBRIC_SATURATION_PENALTY_THRESHOLD = 5
+RUBRIC_SATURATION_CAP_THRESHOLD = 7
+UNFOCUSED_WEDGE_PENALTY_THRESHOLD = 4
+UNFOCUSED_WEDGE_CAP_THRESHOLD = 6
+STUFFED_VOCABULARY_THRESHOLD = 10
 
 
 @dataclass(frozen=True)
@@ -94,12 +107,69 @@ class Ranker:
 
         traps = identify_traps(text, customer_text, revenue, criteria)
 
+        # Step 2b: breadth budgets - traps for text that games the rubric by breadth.
+        pain_domains = fired_pain_concepts(text)
+        if len(pain_domains) >= UNFOCUSED_WEDGE_PENALTY_THRESHOLD:
+            # UNFOCUSED_WEDGE_PENALTY_THRESHOLD-5 pain domains = penalty-only scope warning;
+            # >= UNFOCUSED_WEDGE_CAP_THRESHOLD = cap applied below,
+            # since no coherent single wedge spans six pain domains.
+            overflow = len(pain_domains) - (UNFOCUSED_WEDGE_PENALTY_THRESHOLD - 1)
+            labels = [name.removesuffix("_pain").replace("_", " ") for name in pain_domains]
+            traps.append(
+                Trap(
+                    "unfocused wedge",
+                    round(min(4.0 * overflow, 16.0), 1),
+                    (
+                        f"The thesis spans {len(pain_domains)} pain areas "
+                        f"({', '.join(labels)}); a 10-week v1 has to win one wedge "
+                        "first, so breadth this wide is a scope risk."
+                    ),
+                )
+            )
+
+        # Measured on the project's own fixtures: the most verbose legitimate thesis
+        # fires 8 distinct positive concepts; adversarial stuffers fire 18+; threshold
+        # STUFFED_VOCABULARY_THRESHOLD leaves a 1-concept margin (9 is safe, 10 trips).
+        distinct_positives = {
+            name
+            for names in fired_concepts.values()
+            for name in names
+            if not name.startswith("-")
+        }
+        if len(distinct_positives) >= STUFFED_VOCABULARY_THRESHOLD:
+            overflow = len(distinct_positives) - (STUFFED_VOCABULARY_THRESHOLD - 1)
+            traps.append(
+                Trap(
+                    "stuffed vocabulary",
+                    round(min(4.0 * overflow, 16.0), 1),
+                    (
+                        f"The text fires {len(distinct_positives)} distinct positive signals "
+                        "across the rubric; the most credible focused theses fire fewer than "
+                        "ten, so this reads as keyword stuffing rather than one buildable wedge."
+                    ),
+                )
+            )
+
+        high_criteria = sorted(name for name, value in criteria.items() if value >= 85)
+        if len(high_criteria) >= RUBRIC_SATURATION_PENALTY_THRESHOLD:
+            traps.append(
+                Trap(
+                    "rubric saturation",
+                    round(min(4.0 * (len(high_criteria) - (RUBRIC_SATURATION_PENALTY_THRESHOLD - 1)), 16.0), 1),
+                    (
+                        f"{len(high_criteria)} of 12 criteria score 85+ simultaneously; "
+                        "real wedges have weak spots, so a sweep this broad reads as "
+                        "text optimized for the rubric."
+                    ),
+                )
+            )
+
         # Step 3: saturated-category trap + cap (improvement B)
         saturation_hit = detect_saturation(text)
         if saturation_hit is not None:
             traps.append(_saturated_category_trap(saturation_hit, criteria))
 
-        viability_cap = compute_viability_cap(criteria, traps)
+        viability_cap = compute_viability_cap(criteria, traps, pain_domain_count=len(pain_domains), high_criteria_count=len(high_criteria))
         if saturation_hit is not None:
             viability_cap = _apply_saturation_cap(viability_cap, saturation_hit)
 
@@ -213,7 +283,7 @@ def _tier_for(card: Scorecard) -> str:
         return "Strong"
     if card.percentile >= 30:
         return "Watch"
-    return "Trap"
+    return "Trap" if card.traps else "Lagging"
 
 
 def buyer_pain(text: str) -> float:
@@ -243,8 +313,8 @@ def buyer_pain(text: str) -> float:
             "stockists",
             "faire",
             "rising-price",
-            "15% commission",
             "cancel",
+            "cancellation",
             "churn",
             "subscription",
             "helpdesk",
@@ -262,7 +332,6 @@ def buyer_pain(text: str) -> float:
             "nexus",
             "filing",
             "accountant-ready",
-            "profit truth",
             "losing money",
             "cogs",
             "marketplace fees",
@@ -282,7 +351,7 @@ def buyer_pain(text: str) -> float:
         ),
         cap=5,
     )
-    score += 4 * count_any(text, ("aov", "bundle", "upsell", "reorder", "loyalty", "referral"), cap=3)
+    score += 4 * count_any(text, ("aov", "bundle", "upsell", "upselling", "reorder", "reordering", "loyalty", "referral"), cap=3)
     score -= 6 * count_any(text, ("mystery", "guess", "screenshot", "share card", "animated card"), cap=2)
     return clamp(score)
 
@@ -294,6 +363,7 @@ def roi_visibility(text: str) -> float:
         (
             "recover",
             "recovered",
+            "recovery",
             "revenue",
             "margin",
             "commission",
@@ -312,6 +382,7 @@ def roi_visibility(text: str) -> float:
             "conversion",
             "return",
             "reorder",
+            "reordering",
             "support",
             "ticket",
             "tickets",
@@ -353,10 +424,8 @@ def buyer_clarity(thesis: Thesis, revenue: RevenueRange | None) -> float:
         score += 5
     if contains_any(text, ("sub-$", "sub $", "$1k-50k")):
         score -= 8
-    if contains_any(text, ("$10m", "10m+")):
+    if contains_any(text, ("$10m", "10m+", "€10m", "£10m")):
         score -= 6
-    if contains_any(text, ("reptile", "lingerie")):
-        score -= 5
     return clamp(score)
 
 
@@ -371,12 +440,9 @@ def low_setup_friction(text: str) -> float:
             "theme app extension",
             "widget",
             "csv",
-            "zero curation",
-            "no customer portal",
             "plug into",
             "drag-and-drop",
             "native shopify",
-            "morning fix list",
             "checklists",
             "calendar",
             "exports",
@@ -419,18 +485,16 @@ def market_access(customer_text: str, revenue: RevenueRange | None) -> float:
             score = 48
         elif high and high <= 1_000_000 and low <= 100_000:
             score = 64
-        elif high and high <= 5_000_000 and low >= 100_000:
-            score = 78
         elif high and high <= 5_000_000 and low >= 500_000:
             score = 82
+        elif high and high <= 5_000_000 and low >= 100_000:
+            score = 78
         elif high and high >= 10_000_000:
             score = 64
         elif not high and low >= 500_000:
             score = 66
     if contains_any(customer_text, ("dtc brands", "shopify", "marketplace", "sellers", "retailers")):
         score += 5
-    if contains_any(customer_text, ("reptile", "lingerie")):
-        score -= 9
     if contains_any(customer_text, ("sub-$500k", "sub $500k", "sub-$1m", "sub $1m")):
         score -= 6
     return clamp(score)
@@ -473,6 +537,7 @@ def buildability(text: str) -> float:
             "ar try-on",
             "realtime api",
             "real-time",
+            "near-real-time",
             "live-video",
             "voice questions",
             "voice-clone",
@@ -577,7 +642,6 @@ def operational_simplicity(text: str) -> float:
             "liquidation",
             "resale",
             "supplier po",
-            "supplier pos",
             "cash",
             "commission",
             "payouts",
@@ -603,7 +667,6 @@ def expansion_surface(text: str) -> float:
     score += 9 * count_any(
         text,
         (
-            "demand inbox",
             "back-in-stock",
             "preorder",
             "wishlist",
@@ -621,7 +684,6 @@ def expansion_surface(text: str) -> float:
             "catalog health",
             "stockists",
             "loyalty",
-            "profit truth",
             "sku p&l",
             "marketplace",
             "sales-tax",
@@ -630,7 +692,6 @@ def expansion_surface(text: str) -> float:
             "recall",
             "compliance",
             "supplier reliability",
-            "negotiation briefs",
             "damage-rate",
         ),
         cap=5,
@@ -647,22 +708,12 @@ def differentiation(text: str) -> float:
         (
             "unified",
             "one dashboard",
-            "demand inbox",
-            "zero javascript",
-            "zero external javascript",
-            "actual",
             "approval",
             "approve",
             "migrate",
             "native",
             "rules",
-            "queue-and-drip",
-            "product is locked",
-            "no customer portal",
-            "profit truth",
             "proof trail",
-            "negotiation briefs",
-            "without becoming a full tax filing platform",
         ),
         cap=5,
     )
@@ -672,12 +723,10 @@ def differentiation(text: str) -> float:
             "1/10th",
             "priced at",
             "$19/mo",
+            "$19/month",
             "flat monthly",
             "flat eur",
             "flat €",
-            "killing octane",
-            "gorgiaslite",
-            "lite",
             "cheaper",
         ),
         cap=4,
@@ -692,7 +741,6 @@ def defensibility(text: str) -> float:
         (
             "per-customer",
             "per-sku",
-            "demand inbox",
             "merchant's own data",
             "category-normalized",
             "dashboard",
@@ -702,7 +750,6 @@ def defensibility(text: str) -> float:
             "customer profile",
             "stockists",
             "supplier",
-            "catalog every night",
             "batch ids",
             "lot-level",
             "proof trail",
@@ -826,7 +873,7 @@ def identify_traps(
                 "The product asks merchants or shoppers to adopt a new behavior before ROI is obvious.",
             )
         )
-    if contains_any(text, ("1/10th", "$19/mo", "flat monthly", "killing octane", "gorgiaslite")):
+    if contains_any(text, ("1/10th", "$19/mo", "$19/month", "flat monthly", "fraction of the price", "drop-in replacement", "cheaper than")):
         traps.append(
             Trap(
                 "cheap clone",
@@ -853,7 +900,16 @@ def identify_traps(
     return traps
 
 
-def compute_viability_cap(criteria: dict[str, float], traps: list[Trap]) -> float:
+def compute_viability_cap(
+    criteria: dict[str, float],
+    traps: list[Trap],
+    *,
+    pain_domain_count: int = 0,
+    high_criteria_count: int = 0,
+) -> float:
+    """Owns every cap in the model. Trap-name rungs come from `traps`; the
+    pain-domain and high-criteria rungs are threshold-based on counts passed by
+    score(), so penalty-only bands below those thresholds never cap."""
     weak_link = min(
         criteria["buildability"],
         criteria["platform_access"],
@@ -870,6 +926,14 @@ def compute_viability_cap(criteria: dict[str, float], traps: list[Trap]) -> floa
         cap = min(cap, 68)
     if "thin data" in trap_names:
         cap = min(cap, 70)
+    if "stuffed vocabulary" in trap_names:
+        cap = min(cap, 72)
+    # UNFOCUSED_WEDGE_PENALTY_THRESHOLD-5 pain domains = penalty only; >= UNFOCUSED_WEDGE_CAP_THRESHOLD
+    # also caps because no coherent single wedge spans six pain domains.
+    if pain_domain_count >= UNFOCUSED_WEDGE_CAP_THRESHOLD:
+        cap = min(cap, 72)
+    if high_criteria_count >= RUBRIC_SATURATION_CAP_THRESHOLD:
+        cap = min(cap, 72)
     if "compliance scope" in trap_names:
         cap = min(cap, 78)
     if "platform breadth" in trap_names:
@@ -924,7 +988,7 @@ def smallest_sellable_v1(card: Scorecard) -> str:
         return "A failed-payment webhook listener that sends a three-step email/SMS recovery sequence and reports dollars recovered."
     if contains_any(text, ("return", "refund", "exchange", "resale")):
         return "A return-intake rules screen that recommends exchange, credit, or resale routing and shows estimated margin impact before any automation."
-    if contains_any(text, ("inventory", "supplier", "po")):
+    if contains_any(text, ("inventory", "supplier", "purchase order", "po history", "reorder point")):
         return "A stock-level watcher that drafts supplier PO emails from reorder rules and requires merchant approval before sending."
     if contains_any(text, ("ad creative", "meta", "tiktok", "creative")):
         return "An approval-first creative generator that exports static ad variants from product photos before attempting direct ad-account launch."
@@ -965,11 +1029,11 @@ def make_evidence(thesis: Thesis, card: Scorecard, revenue: RevenueRange | None)
 def infer_tags(text: str, customer_text: str) -> list[str]:
     tags: list[str] = []
     checks = (
-        ("conversion", ("cart", "checkout", "aov", "bundle", "quiz", "pdp", "social proof")),
-        ("retention", ("subscription", "reorder", "replenishment", "loyalty", "churn", "cancel")),
+        ("conversion", ("cart", "add-to-cart", "in-cart", "checkout", "aov", "bundle", "quiz", "quizzes", "pdp", "social proof")),
+        ("retention", ("subscription", "reorder", "replenishment", "loyalty", "churn", "cancel", "cancellation")),
         ("returns", ("return", "refund", "exchange", "resale")),
         ("support", ("helpdesk", "where is my order", "wismo", "ticket")),
-        ("inventory", ("inventory", "supplier", "stock", "back-in-stock", "preorder", "pre-order")),
+        ("inventory", ("inventory", "supplier", "stock", "restocking", "back-in-stock", "preorder", "pre-order")),
         ("b2b", ("wholesale", "b2b", "stockists", "faire")),
         ("marketing", ("email", "sms", "ad creative", "meta", "tiktok", "occasion")),
         ("ai", ("ai", "gpt", "llm", "embedding", "diffusion", "vision")),
@@ -985,16 +1049,24 @@ def infer_tags(text: str, customer_text: str) -> list[str]:
     return tags
 
 
+MONEY_PATTERN = re.compile(
+    r"[$€£]\s*(\d+(?:,\d{3})*(?:\.\d+)?)\s*([km])(?:illion)?\b"
+    r"|[$€£]\s*(\d{1,3}(?:,\d{3})+)(?![\d,]*\s*[km])"
+)
+
+
 def parse_revenue_range(text: str) -> RevenueRange | None:
     normalized = normalize(text)
-    amounts = [
-        money_to_number(match.group(1), match.group(2))
-        for match in re.finditer(r"(?:[$€]\s*)?(\d+(?:\.\d+)?)\s*([km])", normalized)
-    ]
+    amounts = []
+    for match in MONEY_PATTERN.finditer(normalized):
+        if match.group(1) is not None and match.group(2) is not None:
+            amounts.append(money_to_number(match.group(1).replace(",", ""), match.group(2)))
+        else:
+            amounts.append(float(match.group(3).replace(",", "")))
     if not amounts:
         return None
     first = amounts[0]
-    if contains_any(normalized, ("sub-$", "sub $", "under $", "under ")) and len(amounts) == 1:
+    if contains_any(normalized, ("sub-$", "sub $", "under $")) and len(amounts) == 1:
         return RevenueRange(0, first)
     if "+" in normalized and len(amounts) == 1:
         return RevenueRange(first, None)
@@ -1095,12 +1167,11 @@ def money_to_number(amount: str, suffix: str) -> float:
 
 
 def contains_any(text: str, needles: tuple[str, ...]) -> bool:
-    return any(needle in text for needle in needles)
+    return any_phrase(text, needles)
 
 
 def count_any(text: str, needles: tuple[str, ...], *, cap: int) -> int:
-    count = sum(1 for needle in needles if needle in text)
-    return min(count, cap)
+    return count_phrases(text, needles, cap=cap)
 
 
 def weighted_average(values: tuple[tuple[float, float], ...]) -> float:

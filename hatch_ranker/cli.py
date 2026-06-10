@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 
 from hatch_ranker.io import load_theses, write_outputs
+from hatch_ranker.models import Thesis
 from hatch_ranker.ranker import Ranker
 
 
@@ -50,6 +51,16 @@ def main(argv: list[str] | None = None) -> int:
         new_theses = load_theses(append_path, is_new=True, start_index=start_index)
         theses.extend(new_theses)
         start_index += len(new_theses)
+
+    seen_refs: set[str] = set()
+    unique: list[Thesis] = []
+    for thesis in theses:
+        if thesis.ref in seen_refs:
+            print(f"Skipping duplicate ref {thesis.ref} (source row {thesis.source_index + 1}).")
+            continue
+        seen_refs.add(thesis.ref)
+        unique.append(thesis)
+    theses = unique
 
     cards = Ranker().rank(theses)
     write_outputs(cards, Path(args.out_dir), top_n=args.top)

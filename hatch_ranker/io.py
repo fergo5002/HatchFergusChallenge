@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import json
+from io import StringIO
 from pathlib import Path
 from typing import Iterable
 
@@ -69,7 +70,7 @@ def _load_json_records(path: Path) -> list[dict[str, object]]:
 
 def _load_csv_records(path: Path) -> list[dict[str, object]]:
     raw = _read_text(path)
-    rows = csv.DictReader(raw.splitlines())
+    rows = csv.DictReader(StringIO(raw))
     return [dict(row) for row in rows]
 
 
@@ -162,9 +163,9 @@ def _write_markdown(cards: list[Scorecard], path: Path, *, top_n: int) -> None:
         "- Cash velocity: buyer pain, ROI visibility, buyer clarity, setup friction, and target-market accessibility.",
         "- V1 viability: buildability, platform access, data access, and operational simplicity.",
         "- Company potential: expansion surface, differentiation, repeatability, and defensibility.",
-        "- Trap handling: severe technical, platform, trust, data, novelty, clone, and saturated-category risks cap or penalize the final score.",
-        "- Concept-anchor blend: each keyword criterion is adjusted by +/- 20 based on which broader concepts fire, so synonym drift in new theses does not collapse a score to baseline.",
-        "- Tier: Top Tier / Strong / Watch / Trap, calibrated against the actual corpus percentile.",
+        "- Trap handling: severe technical, platform, trust, data, novelty, clone, and saturated-category risks cap or penalize the final score, and three breadth budgets (unfocused wedge, stuffed vocabulary, rubric saturation) trap text that games the rubric.",
+        "- Concept-anchor blend: each keyword criterion is adjusted within [-15, +25] based on which broader concepts fire, so synonym drift in new theses does not collapse a score to baseline.",
+        "- Tier: Top Tier / Strong / Watch / Lagging / Trap, calibrated against the actual corpus percentile (Trap requires an actual trap).",
         "",
         "## Tier Summary",
         "",
@@ -227,7 +228,7 @@ def _escape_md(value: str) -> str:
 
 
 def _tier_summary(cards: list[Scorecard]) -> str:
-    tier_order = ("Top Tier", "Strong", "Watch", "Trap")
+    tier_order = ("Top Tier", "Strong", "Watch", "Lagging", "Trap")
     counts = {tier: 0 for tier in tier_order}
     for card in cards:
         if card.tier in counts:
