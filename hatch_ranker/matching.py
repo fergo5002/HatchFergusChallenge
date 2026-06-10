@@ -41,6 +41,12 @@ def phrase_in(text: str, needle: str) -> bool:
 
     if not needle:
         return False
+    # Sound prefilter: the pattern is the escaped literal needle plus boundary
+    # assertions (which only reject) and an optional plural tail (which only
+    # extends), so a raw substring hit is a necessary condition for any match.
+    # This skips the regex for the ~95% of needles a thesis never mentions.
+    if needle not in text:
+        return False
     for match in _compiled(needle).finditer(text):
         if not _negated(text, match.start()):
             return True
