@@ -22,6 +22,9 @@ from hatch_ranker.models import Scorecard, Thesis, Trap
 # lands ~79.
 RUBRIC_SATURATION_PENALTY_THRESHOLD = 5
 RUBRIC_SATURATION_CAP_THRESHOLD = 7
+UNFOCUSED_WEDGE_PENALTY_THRESHOLD = 4
+UNFOCUSED_WEDGE_CAP_THRESHOLD = 6
+STUFFED_VOCABULARY_THRESHOLD = 10
 
 
 @dataclass(frozen=True)
@@ -106,10 +109,11 @@ class Ranker:
 
         # Step 2b: breadth budgets - traps for text that games the rubric by breadth.
         pain_domains = fired_pain_concepts(text)
-        if len(pain_domains) >= 4:
-            # 4-5 domains = penalty-only scope warning; >= 6 = cap applied below,
+        if len(pain_domains) >= UNFOCUSED_WEDGE_PENALTY_THRESHOLD:
+            # UNFOCUSED_WEDGE_PENALTY_THRESHOLD-5 pain domains = penalty-only scope warning;
+            # >= UNFOCUSED_WEDGE_CAP_THRESHOLD = cap applied below,
             # since no coherent single wedge spans six pain domains.
-            overflow = len(pain_domains) - 3
+            overflow = len(pain_domains) - (UNFOCUSED_WEDGE_PENALTY_THRESHOLD - 1)
             labels = [name.removesuffix("_pain").replace("_", " ") for name in pain_domains]
             traps.append(
                 Trap(
@@ -125,15 +129,15 @@ class Ranker:
 
         # Measured on the project's own fixtures: the most verbose legitimate thesis
         # fires 8 distinct positive concepts; adversarial stuffers fire 18+; threshold
-        # 10 leaves a 1-concept margin (9 is safe, 10 trips).
+        # STUFFED_VOCABULARY_THRESHOLD leaves a 1-concept margin (9 is safe, 10 trips).
         distinct_positives = {
             name
             for names in fired_concepts.values()
             for name in names
             if not name.startswith("-")
         }
-        if len(distinct_positives) >= 10:
-            overflow = len(distinct_positives) - 9
+        if len(distinct_positives) >= STUFFED_VOCABULARY_THRESHOLD:
+            overflow = len(distinct_positives) - (STUFFED_VOCABULARY_THRESHOLD - 1)
             traps.append(
                 Trap(
                     "stuffed vocabulary",
@@ -151,7 +155,7 @@ class Ranker:
             traps.append(
                 Trap(
                     "rubric saturation",
-                    round(min(4.0 * (len(high_criteria) - 4), 16.0), 1),
+                    round(min(4.0 * (len(high_criteria) - (RUBRIC_SATURATION_PENALTY_THRESHOLD - 1)), 16.0), 1),
                     (
                         f"{len(high_criteria)} of 12 criteria score 85+ simultaneously; "
                         "real wedges have weak spots, so a sweep this broad reads as "
@@ -723,7 +727,6 @@ def differentiation(text: str) -> float:
             "flat monthly",
             "flat eur",
             "flat €",
-            "lite",
             "cheaper",
         ),
         cap=4,
@@ -925,9 +928,9 @@ def compute_viability_cap(
         cap = min(cap, 70)
     if "stuffed vocabulary" in trap_names:
         cap = min(cap, 72)
-    # 4-5 pain domains = penalty only; >= 6 also caps because no coherent
-    # single wedge spans six pain domains.
-    if pain_domain_count >= 6:
+    # UNFOCUSED_WEDGE_PENALTY_THRESHOLD-5 pain domains = penalty only; >= UNFOCUSED_WEDGE_CAP_THRESHOLD
+    # also caps because no coherent single wedge spans six pain domains.
+    if pain_domain_count >= UNFOCUSED_WEDGE_CAP_THRESHOLD:
         cap = min(cap, 72)
     if high_criteria_count >= RUBRIC_SATURATION_CAP_THRESHOLD:
         cap = min(cap, 72)
@@ -1046,15 +1049,20 @@ def infer_tags(text: str, customer_text: str) -> list[str]:
     return tags
 
 
-MONEY_PATTERN = re.compile(r"[$€£]\s*(\d+(?:,\d{3})*(?:\.\d+)?)\s*([km])(?:illion)?\b")
+MONEY_PATTERN = re.compile(
+    r"[$€£]\s*(\d+(?:,\d{3})*(?:\.\d+)?)\s*([km])(?:illion)?\b"
+    r"|[$€£]\s*(\d{1,3}(?:,\d{3})+)(?![\d,]*\s*[km])"
+)
 
 
 def parse_revenue_range(text: str) -> RevenueRange | None:
     normalized = normalize(text)
-    amounts = [
-        money_to_number(match.group(1).replace(",", ""), match.group(2))
-        for match in MONEY_PATTERN.finditer(normalized)
-    ]
+    amounts = []
+    for match in MONEY_PATTERN.finditer(normalized):
+        if match.group(1) is not None and match.group(2) is not None:
+            amounts.append(money_to_number(match.group(1).replace(",", ""), match.group(2)))
+        else:
+            amounts.append(float(match.group(3).replace(",", "")))
     if not amounts:
         return None
     first = amounts[0]

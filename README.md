@@ -38,7 +38,7 @@ python -m hatch_ranker.web --port 8765
 
 Then open `http://127.0.0.1:8765`. The UI accepts the same JSON shape as the CLI: a list of thesis objects, or an object with `theses` or `items`. Appended ideas are kept in browser local storage and marked as new while the combined list is reranked.
 
-To enable the optional AI edge-case scan, add `GROQ_API_KEY` to a local `.env` file before starting the UI. The scan runs only when you click the button, sends the current ranked cards in one batched request, and returns short risk/opportunity observations for cases the fixed rulebook may miss.
+To enable the optional AI edge-case scan, add `GROQ_API_KEY` to a local `.env` file before starting the UI. The scan runs only when you click the button, sends the current ranked cards in one batched request, and returns short risk/opportunity observations for cases the fixed rulebook may miss. Optionally set `AI_SCAN_TOKEN` to require an `X-Scan-Token` header on `/api/ai-scan` (recommended for public deployments).
 
 ## Model
 
@@ -56,6 +56,19 @@ Then it applies trap handling:
 - **Novelty demand**: ideas that require new consumer behavior before ROI is obvious.
 - **Cheap clone**: wedges that are mostly price arbitrage against incumbents.
 - **Thin data**: target customers may not have enough data for the promised model.
+- **Platform depth**: deep API surfaces on a single platform that may be gated or change without notice.
+- **Platform breadth**: the wedge spans too many platforms simultaneously for a 10-week v1.
+- **Marketplace platform**: marketplace-first ideas where account health or policy risk cap the ceiling.
+- **Compliance scope**: regulatory filing, recall, or cross-border duty work that requires specialist sign-off.
+- **Unclear first sale**: no credible description of who pays, for what, on day one.
+- **Saturated category**: a crowded market with named incumbents and no differentiated wedge.
+- **Unfocused wedge**: 4+ distinct pain domains — too wide for one 10-week v1.
+- **Stuffed vocabulary**: 10+ distinct positive signals fired — reads as keyword stuffing, not one buildable wedge.
+- **Rubric saturation**: 5+ of 12 criteria at 85+ simultaneously — real wedges have weak spots.
+
+Matching is word-boundary based with light negation handling (see hatch_ranker/matching.py) so substring artifacts ("vat" in "private") cannot score, and revenue bands require an explicit currency symbol ($, €, £).
+
+Tiers are Top Tier / Strong / Watch / Lagging / Trap, percentile-calibrated against the actual corpus; "Trap" requires an actual trap.
 
 The final score is:
 

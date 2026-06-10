@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hmac
 import json
 import mimetypes
 import os
@@ -72,7 +73,7 @@ def ai_scan_payload(payload: Any, *, token: str = "") -> tuple[int, dict[str, An
     """
 
     required = os.environ.get("AI_SCAN_TOKEN", "")
-    if required and token != required:
+    if required and not hmac.compare_digest(token, required):
         return 401, {"ok": False, "observations": [], "error": "Missing or invalid scan token."}
 
     if isinstance(payload, dict):

@@ -529,6 +529,12 @@ class MoneyParserTests(unittest.TestCase):
         self.assertIsNotNone(revenue)
         self.assertEqual(revenue.low, 2_000_000)
 
+    def test_full_digit_amounts_parse(self) -> None:
+        revenue = parse_revenue_range("US DTC brands, $500,000-$5,000,000")
+        self.assertIsNotNone(revenue)
+        self.assertEqual(revenue.low, 500_000)
+        self.assertEqual(revenue.high, 5_000_000)
+
 
 class MarketAccessBandTests(unittest.TestCase):
     def test_mid_market_premium_band_is_reachable(self) -> None:
