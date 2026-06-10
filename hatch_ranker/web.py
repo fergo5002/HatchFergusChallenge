@@ -62,7 +62,7 @@ def root_issue(message: str) -> ValidationIssue:
     return ValidationIssue(-1, "", "_json", "error", message)
 
 
-def ai_scan_payload(payload: Any) -> tuple[int, dict[str, Any]]:
+def ai_scan_payload(payload: Any, *, token: str = "") -> tuple[int, dict[str, Any]]:
     """Run the AI edge-case scan and return a JSON-ready response.
 
     The response carries advisory observations only (ref, kind, note). It never
@@ -70,6 +70,10 @@ def ai_scan_payload(payload: Any) -> tuple[int, dict[str, Any]]:
     deterministic ranking but can never alter it. See ai_scan.py for the full
     non-interference contract; tests/test_ai_separation.py guards it.
     """
+
+    required = os.environ.get("AI_SCAN_TOKEN", "")
+    if required and token != required:
+        return 401, {"ok": False, "observations": [], "error": "Missing or invalid scan token."}
 
     if isinstance(payload, dict):
         cards = payload.get("ranking") or payload.get("cards") or payload.get("items")
@@ -189,7 +193,7 @@ class HatchRankerRequestHandler(BaseHTTPRequestHandler):
         if route == "/api/rank":
             status, body = rank_payload(payload)
         else:
-            status, body = ai_scan_payload(payload)
+            status, body = ai_scan_payload(payload, token=self.headers.get("X-Scan-Token", ""))
         self._send_json(status, body)
 
     def log_message(self, format: str, *args: Any) -> None:

@@ -83,7 +83,7 @@ class handler(BaseHTTPRequestHandler):
         if route == "/api/rank":
             status, body = rank_payload(payload)
         else:
-            status, body = ai_scan_payload(payload)
+            status, body = ai_scan_payload(payload, token=self.headers.get("X-Scan-Token", ""))
         self._send_json(status, body)
 
     def do_OPTIONS(self) -> None:
@@ -123,7 +123,7 @@ class handler(BaseHTTPRequestHandler):
     def _cors_headers(self) -> None:
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, X-Scan-Token")
 
     def log_message(self, format: str, *args) -> None:
         return
