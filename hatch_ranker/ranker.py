@@ -279,7 +279,7 @@ def _tier_for(card: Scorecard) -> str:
         return "Strong"
     if card.percentile >= 30:
         return "Watch"
-    return "Trap"
+    return "Trap" if card.traps else "Lagging"
 
 
 def buyer_pain(text: str) -> float:

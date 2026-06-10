@@ -10,7 +10,7 @@ phrases that mean the same operational thing). A thesis fires a concept when
 any phrase in its trigger set appears in the normalized text. The criterion
 score is then adjusted by:
 
-    +4 per fired positive concept (capped at 5)
+    +5 per fired positive concept (capped at 5)
     -5 per fired negative concept (capped at 3)
 
 The adjustment is added to the keyword score and clamped to [0, 100]. When no
@@ -496,7 +496,7 @@ def concept_adjustment(text: str, criterion: str) -> tuple[float, list[str]]:
     """Return the bounded adjustment a criterion should add to its keyword
     score, and the list of fired concept names (negatives prefixed with ``-``).
 
-    The output is in the range [-15, +20] when configured with the default
+    The output is in the range [-15, +25] when configured with the default
     weights, so blending against a keyword score that lives in [0, 100] keeps
     final criterion scores stable.
     """

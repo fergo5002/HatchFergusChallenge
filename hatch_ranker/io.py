@@ -163,7 +163,7 @@ def _write_markdown(cards: list[Scorecard], path: Path, *, top_n: int) -> None:
         "- V1 viability: buildability, platform access, data access, and operational simplicity.",
         "- Company potential: expansion surface, differentiation, repeatability, and defensibility.",
         "- Trap handling: severe technical, platform, trust, data, novelty, clone, and saturated-category risks cap or penalize the final score.",
-        "- Concept-anchor blend: each keyword criterion is adjusted by +/- 20 based on which broader concepts fire, so synonym drift in new theses does not collapse a score to baseline.",
+        "- Concept-anchor blend: each keyword criterion is adjusted within [-15, +25] based on which broader concepts fire, so synonym drift in new theses does not collapse a score to baseline.",
         "- Tier: Top Tier / Strong / Watch / Trap, calibrated against the actual corpus percentile.",
         "",
         "## Tier Summary",
@@ -227,7 +227,7 @@ def _escape_md(value: str) -> str:
 
 
 def _tier_summary(cards: list[Scorecard]) -> str:
-    tier_order = ("Top Tier", "Strong", "Watch", "Trap")
+    tier_order = ("Top Tier", "Strong", "Watch", "Lagging", "Trap")
     counts = {tier: 0 for tier in tier_order}
     for card in cards:
         if card.tier in counts:
