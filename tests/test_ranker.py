@@ -351,6 +351,16 @@ class MoneyParserTests(unittest.TestCase):
         self.assertIsNotNone(revenue)
         self.assertEqual(revenue.low, 500_000)
 
+    def test_spelled_out_million_parses(self) -> None:
+        revenue = parse_revenue_range("brands doing $1.5 million ARR")
+        self.assertIsNotNone(revenue)
+        self.assertEqual(revenue.low, 1_500_000)
+
+    def test_bare_under_does_not_zero_the_floor(self) -> None:
+        revenue = parse_revenue_range("under 10 minutes setup, brands doing $2M")
+        self.assertIsNotNone(revenue)
+        self.assertEqual(revenue.low, 2_000_000)
+
 
 class MarketAccessBandTests(unittest.TestCase):
     def test_mid_market_premium_band_is_reachable(self) -> None:

@@ -990,7 +990,7 @@ def infer_tags(text: str, customer_text: str) -> list[str]:
     return tags
 
 
-MONEY_PATTERN = re.compile(r"[$€£]\s*(\d+(?:,\d{3})*(?:\.\d+)?)\s*([km])\b")
+MONEY_PATTERN = re.compile(r"[$€£]\s*(\d+(?:,\d{3})*(?:\.\d+)?)\s*([km])(?:illion)?\b")
 
 
 def parse_revenue_range(text: str) -> RevenueRange | None:
@@ -1002,7 +1002,7 @@ def parse_revenue_range(text: str) -> RevenueRange | None:
     if not amounts:
         return None
     first = amounts[0]
-    if contains_any(normalized, ("sub-$", "sub $", "under $", "under ")) and len(amounts) == 1:
+    if contains_any(normalized, ("sub-$", "sub $", "under $")) and len(amounts) == 1:
         return RevenueRange(0, first)
     if "+" in normalized and len(amounts) == 1:
         return RevenueRange(first, None)
